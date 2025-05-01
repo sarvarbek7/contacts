@@ -1,0 +1,21 @@
+using Contacts.Domain.PhoneNumbers;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Contacts.Infrastructure.Persistance.EntityConfigs.PhoneNumbers;
+
+internal class PhoneNumberConfig : IEntityTypeConfiguration<PhoneNumber>
+{
+    public void Configure(EntityTypeBuilder<PhoneNumber> builder)
+    {
+        builder.HasMany(x => x.UsersHistory)
+            .WithOne(x => x.PhoneNumber)
+            .HasForeignKey(x => x.PhoneNumberId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.ActiveAssignedUser)
+            .WithMany()
+            .HasForeignKey(x => x.ActiveAssignedUserId)
+            .OnDelete(DeleteBehavior.SetNull);
+    }
+}
