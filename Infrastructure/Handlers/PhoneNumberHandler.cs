@@ -34,22 +34,46 @@ class PhoneNumberHandler(BaseService<PhoneNumber, Guid> phoneNumberService) : IP
                                                                  tracked: true,
                                                                  cancellationToken: cancellationToken);
 
-        return await errorOrStoredPhoneNumber.MatchAsync<ErrorOr<Deleted>>(async v => {
-            return await phoneNumberService.Delete(v, true, cancellationToken);
-        }, async e => {
-            await Task.CompletedTask;
-            
-            return e;
-        });
+        return await errorOrStoredPhoneNumber.MatchAsync<ErrorOr<Deleted>>(async v =>
+            {
+                v.DeletedById = message.UserAccountIdWhoDoesAction;
+                v.DeletedAt = DateTime.UtcNow;
+
+                return await phoneNumberService.Delete(v, true, cancellationToken);
+            }, async e =>
+            {
+                await Task.CompletedTask;
+
+                return e;
+            });
     }
 
-    public Task HandleGetById(GetPhoneNumberByIdMessage message, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<PhoneNumber>> HandleGetById(GetPhoneNumberByIdMessage message, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return await phoneNumberService.GetById(message.Id,
+                                                tracked: true,
+                                                cancellationToken: cancellationToken);
+
     }
 
-    public Task HandleUpdate(UpdatePhoneNumberMessage message, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<Updated>> HandleUpdate(UpdatePhoneNumberMessage message, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var errorOrStoredPhoneNumber = await phoneNumberService.GetById(message.Id,
+                                                                 tracked: true,
+                                                                 cancellationToken: cancellationToken);
+
+        return await errorOrStoredPhoneNumber.MatchAsync<ErrorOr<Updated>>(async v =>
+            {
+                v.Number = message.Number;
+                v.UpdatedById = message.UserAccountIdWhoDoesAction;
+                v.UpdatedAt = DateTime.UtcNow;
+
+                return await phoneNumberService.Update(v, true, cancellationToken);
+            }, async e =>
+            {
+                await Task.CompletedTask;
+
+                return e;
+            });
     }
 }
