@@ -1,7 +1,12 @@
 using Contacts.Application;
+using Contacts.Contracts.PhoneNumbers;
 using Contacts.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Query.Expressions.Internal;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Contacts.Application.ProcessingServices;
+using Contacts.Application.ProcessingServices.Models;
+using Contacts.Api.Endpoints.Structures;
+using Contacts.Api.Endpoints.PhoneNumbers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +15,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddApplication(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Configuration.AddJsonFile("./appsettings.Production.json", false);
 
 var app = builder.Build();
 
@@ -23,13 +30,7 @@ app.UseHttpsRedirection();
 
 var api = app.MapGroup("api");
 
-var phoneNumbers = api.MapGroup("phone_numbers");
-
-var createPhoneNumber = phoneNumbers.MapPost("", () => TypedResults.Ok());
-var updatePhoneNumber = phoneNumbers.MapPut("{id:guid}", ([FromRoute] Guid id) => TypedResults.Ok());
-var deletePhoneNumber = phoneNumbers.MapDelete("{id:guid}", ([FromRoute] Guid id) => TypedResults.Ok());
-var getPhoneNumber = phoneNumbers.MapGet("{id:guid}", ([FromRoute] Guid id) => TypedResults.Ok());
-var assignPhoneNumber = phoneNumbers.MapPut("{id:guid}/assign", ([FromRoute] Guid id) => TypedResults.Ok());
-var retainPhoneNumber = phoneNumbers.MapPut("{id:guid}/retain", ([FromRoute] Guid id) => TypedResults.Ok());
+api.MapOrganizationStructure();
+api.MapPhoneNumbers();
 
 app.Run();

@@ -5,4 +5,4 @@ using Infrastructure.Repositories;
 namespace Contacts.Infrastructure.Repositories;
 
 internal class PhoneNumberRepository(AppDbContext context) : Repository<AppDbContext, 
-PhoneNumber, Guid>(context), IRepository<PhoneNumber, Guid>;
+    PhoneNumber, Guid>(context), IRepository<PhoneNumber, Guid>;

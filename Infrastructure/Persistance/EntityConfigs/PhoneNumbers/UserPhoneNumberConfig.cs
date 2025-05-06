@@ -7,6 +7,6 @@ internal class UserPhoneNumberConfig : IEntityTypeConfiguration<UserPhoneNumber>
     public void Configure(EntityTypeBuilder<UserPhoneNumber> builder)
     {
         builder.HasQueryFilter(x => x.IsActive);
-        builder.HasQueryFilter(x => !x.PhoneNumber.IsDeleted);
+        builder.HasQueryFilter(x => !x.PhoneNumber!.IsDeleted);
     }
 }

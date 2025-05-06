@@ -1,9 +1,10 @@
 using System.Net;
 using System.Reflection;
 using Application.Services.Foundations;
+using Contacts.Application.ProcessingServices;
 using Contacts.Infrastructure.Persistance;
+using Contacts.Infrastructure.ProcessingServices;
 using Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,13 +12,22 @@ namespace Contacts.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static void AddInfrastructure(this IServiceCollection services, 
+    public static void AddInfrastructure(this IServiceCollection services,
         IConfiguration configuration)
     {
         services.AddDbContext<AppDbContext>();
 
         AddRepositories(services);
         AddFoundationServices(services);
+        AddHttpClients(services);
+
+        services.AddMemoryCache();
+    }
+
+    private static void AddHttpClients(IServiceCollection services)
+    {
+        services.ConfigureHttpClientDefaults(builder => builder.AddStandardResilienceHandler());
+        services.AddHttpClient<IHrmClient, HrmClient>("hrm-http-client");
     }
 
     private static void AddRepositories(IServiceCollection services)

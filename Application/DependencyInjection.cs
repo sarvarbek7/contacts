@@ -1,5 +1,6 @@
 using System.Reflection;
 using Application.Validators;
+using Contacts.Application.Common.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,6 +12,13 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         AddValidators(services);
+
+        ConfigureOptions(services, configuration);
+    }
+
+    private static void ConfigureOptions(IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<List<HttpConfiguration>>(configuration.GetSection(HttpConfiguration.SectionName));
     }
 
     private static void AddValidators(IServiceCollection services)
