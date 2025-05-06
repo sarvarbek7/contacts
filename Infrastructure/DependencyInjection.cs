@@ -1,7 +1,10 @@
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Reflection;
 using Application.Services.Foundations;
+using Contacts.Application.Handlers.Interfaces;
 using Contacts.Application.ProcessingServices;
+using Contacts.Infrastructure.Handlers;
 using Contacts.Infrastructure.Persistance;
 using Contacts.Infrastructure.ProcessingServices;
 using Infrastructure.Repositories;
@@ -20,6 +23,7 @@ public static class DependencyInjection
         AddRepositories(services);
         AddFoundationServices(services);
         AddHttpClients(services);
+        AddHandlers(services);
 
         services.AddMemoryCache();
     }
@@ -28,6 +32,11 @@ public static class DependencyInjection
     {
         services.ConfigureHttpClientDefaults(builder => builder.AddStandardResilienceHandler());
         services.AddHttpClient<IHrmClient, HrmClient>("hrm-http-client");
+    }
+
+    private static void AddHandlers(IServiceCollection services)
+    {
+        services.AddScoped<IPhoneNumberHandler, PhoneNumberHandler>();
     }
 
     private static void AddRepositories(IServiceCollection services)
