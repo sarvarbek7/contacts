@@ -31,7 +31,12 @@ public static class DependencyInjection
     private static void AddHttpClients(IServiceCollection services)
     {
         services.ConfigureHttpClientDefaults(builder => builder.AddStandardResilienceHandler());
+        
         services.AddHttpClient<IHrmClient, HrmClient>("hrm-http-client");
+
+        services.AddHttpClient<IHrmProClient, HrmProClient>("hrm-pro-http-client", config => {
+            config.DefaultRequestHeaders.Add("User-Agent", "ContactsApp/1.0");
+        });
     }
 
     private static void AddHandlers(IServiceCollection services)

@@ -1,26 +1,32 @@
+using System.Collections.Specialized;
+
 namespace Contacts.Application.Common.Extensions;
 
 public static class StringExtensions
 {
     public static string BuildWithQueryParams(this string str, IReadOnlyList<string> queryParamNames, Dictionary<string, object> queryParams)
     {
+        bool isFirst = true;
+
         var url = str;
 
         for (int i = 0; i < queryParamNames.Count; i++)
         {
             string param = queryParamNames[i];
 
-            if (i == 0)
+            if (isFirst)
             {
                 if (queryParams.TryGetValue(param, out var firstParamValue))
                 {
-                    url += $"?{param}={firstParamValue}";
+                    if (firstParamValue is not null)
+                    {
+                        url += $"?{param}={firstParamValue}";
+
+                        isFirst = false;
+                    }
                 }
-
-                continue;
             }
-
-            if (queryParams.TryGetValue(param, out var value))
+            else if (queryParams.TryGetValue(param, out var value))
             {
                 url += $"&{param}={value}";
             }
@@ -28,7 +34,6 @@ public static class StringExtensions
 
         return url;
     }
-
     public static string BuildWithQueryParams(this string str, IReadOnlyList<string> queryParamNames, params object[] args)
     {
         var url = str;

@@ -8,8 +8,8 @@ public class Account : IEntity<int>,
     IDeletedByAccountAudit
 {
     public int Id { get; init; }
-    public string Login { get; set; }
-    public string Password { get; set; }
+    public required string Login { get; set; }
+    public required string Password { get; set; }
     public DateTime CreatedAt { get; set; }
     public Account? CreatedBy { get; set; }
     public int? CreatedById { get; set; }

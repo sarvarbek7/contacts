@@ -1,3 +1,9 @@
+using Contacts.Application.Handlers.Interfaces;
+using Contacts.Application.Handlers.Messages.PhoneNumbers;
+using Contacts.Domain.PhoneNumbers;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+
 namespace Contacts.Api.Endpoints.PhoneNumbers;
 
 public static class GetPhoneNumberEndpoint
@@ -7,5 +13,20 @@ public static class GetPhoneNumberEndpoint
         return route.MapGet(Routes.GetPhoneNumber, Handler);
     }
 
-    static Task Handler() => Task.CompletedTask;
+    static async Task<Results<Ok<PhoneNumber>, ProblemHttpResult>> Handler([FromRoute] Guid id,
+                              HttpContext context,
+                              IPhoneNumberHandler phoneNumberHandler)
+    {
+        var message = new GetPhoneNumberByIdMessage(id);
+
+        var result = await phoneNumberHandler.HandleGetById(message,
+                                                            context.RequestAborted);
+
+        if (result.IsError)
+        {
+            throw new NotImplementedException();
+        }
+
+        return TypedResults.Ok(result.Value);
+    }
 }

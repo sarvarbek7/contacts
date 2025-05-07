@@ -1,14 +1,20 @@
 using Contacts.Application;
-using Contacts.Contracts.PhoneNumbers;
 using Contacts.Infrastructure;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Contacts.Application.ProcessingServices;
-using Contacts.Application.ProcessingServices.Models;
-using Contacts.Api.Endpoints.Structures;
 using Contacts.Api.Endpoints.PhoneNumbers;
+using Contacts.Api.Endpoints.Hrm;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        policy =>
+        {
+            policy.AllowAnyOrigin();
+            policy.AllowAnyHeader();
+            policy.AllowAnyMethod();
+        });
+});
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -26,11 +32,12 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseCors();
 app.UseHttpsRedirection();
 
 var api = app.MapGroup("api");
 
-api.MapOrganizationStructure();
 api.MapPhoneNumbers();
+api.MapHrm();
 
 app.Run();

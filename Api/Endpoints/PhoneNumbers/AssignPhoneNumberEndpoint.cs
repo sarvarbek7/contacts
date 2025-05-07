@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Mvc;
+
 namespace Contacts.Api.Endpoints.PhoneNumbers;
 
 public static class AssignPhoneNumberEndpoint
@@ -7,5 +9,5 @@ public static class AssignPhoneNumberEndpoint
         return route.MapPut(Routes.AssignPhoneNumber, Handler);
     }
 
-    static Task Handler() => Task.CompletedTask;
+    static Task Handler([FromRoute] Guid id) => Task.CompletedTask;
 }

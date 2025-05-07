@@ -4,7 +4,7 @@ public static class PhoneNumbersGroup
 {
      public static RouteGroupBuilder MapPhoneNumbers(this IEndpointRouteBuilder route)
     {
-        var group = route.MapGroup(Routes.PhoneNumbers);
+        var group = route.MapGroup(Routes.PhoneNumbers).WithTags(Tags.PhoneNumbers);
 
         group.MapAssignPhoneNumber();
         group.MapCreatePhoneNumber();

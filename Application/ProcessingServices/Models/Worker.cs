@@ -9,10 +9,10 @@ public record Worker
     public int Id { get; init; }
 
     [JsonPropertyName("first_name")]
-    public string FirstName { get; init; }
+    public required string FirstName { get; init; }
 
     [JsonPropertyName("last_name")]
-    public string LastName { get; init; }
+    public required string LastName { get; init; }
 
     [JsonPropertyName("middle_name")]
     public string? MiddleName { get; init; }
@@ -28,8 +28,7 @@ public record Worker
             FirstName = FirstName,
             LastName = LastName,
             MiddleName = MiddleName,
-            PhotoUrl = Photo,
-            Pinfl = pinfl,
+            Photo = Photo,
         };
     }
 }

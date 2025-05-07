@@ -23,9 +23,9 @@ internal class HrmClient : IHrmClient
     private readonly IConfiguration configuration;
 
     public HrmClient(HttpClient client,
-                             IMemoryCache cache,
-                             IOptions<List<HttpConfiguration>> options,
-                             IConfiguration configuration)
+                     IMemoryCache cache,
+                     IOptions<List<HttpConfiguration>> options,
+                     IConfiguration configuration)
     {
         this.cache = cache;
         this.configuration = configuration;
@@ -135,8 +135,6 @@ internal class HrmClient : IHrmClient
 
     public async ValueTask<LoginResponse> Login(CancellationToken cancellationToken = default)
     {
-        await Task.CompletedTask;
-
         const string key = "hrm_login";
 
         if (cache.TryGetValue(key, out LoginResponse? cachedResponse))
