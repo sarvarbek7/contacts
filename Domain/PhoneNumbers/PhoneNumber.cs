@@ -45,4 +45,18 @@ public class PhoneNumber : IEntity<Guid>,
 
         UsersHistory.Add(newHistory);
     }
+
+    public void UnAssign(int accountId)
+    {
+        ActiveAssignedUserId = null;
+
+        foreach (var history in UsersHistory.Where(x => x.IsActive))
+        {
+            history.IsActive = false;
+            history.RemovedAt = DateTime.UtcNow;
+            
+            // TODO: fix later
+            history.RemovedById = null; //accountId;
+        }
+    }
 }

@@ -2,6 +2,7 @@ using Contacts.Application;
 using Contacts.Infrastructure;
 using Contacts.Api.Endpoints.PhoneNumbers;
 using Contacts.Api.Endpoints.Hrm;
+using Contacts.Api.Endpoints.Users;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,5 +40,6 @@ var api = app.MapGroup("api");
 
 api.MapPhoneNumbers();
 api.MapHrm();
+api.MapUsers();
 
 app.Run();

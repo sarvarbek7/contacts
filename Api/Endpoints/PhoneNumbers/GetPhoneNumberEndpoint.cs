@@ -1,6 +1,7 @@
+using Contacts.Api.Mappings;
 using Contacts.Application.Handlers.Interfaces;
 using Contacts.Application.Handlers.Messages.PhoneNumbers;
-using Contacts.Domain.PhoneNumbers;
+using Contacts.Contracts.PhoneNumbers;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,6 +28,8 @@ public static class GetPhoneNumberEndpoint
             throw new NotImplementedException();
         }
 
-        return TypedResults.Ok(result.Value);
+        var dto = PhoneNumberMapping.PhoneNumberDomainToContract.Compile().Invoke(result.Value);
+
+        return TypedResults.Ok(dto);
     }
 }

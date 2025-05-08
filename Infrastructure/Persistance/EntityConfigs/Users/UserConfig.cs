@@ -24,7 +24,7 @@ internal class UserConfig : IEntityTypeConfiguration<User>
         builder.Property(x => x.MiddleName)
             .HasMaxLength(64);
 
-        builder.HasMany(x => x.PhoneNumbers)
+        builder.HasMany(x => x.PhoneNumberHistory)
             .WithOne(n => n.User)
             .HasForeignKey(n => n.UserId)
             .OnDelete(DeleteBehavior.Cascade);

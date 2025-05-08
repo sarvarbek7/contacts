@@ -14,7 +14,7 @@ internal class PhoneNumberConfig : IEntityTypeConfiguration<PhoneNumber>
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(x => x.ActiveAssignedUser)
-            .WithMany()
+            .WithMany(x => x.ActivePhoneNumbers)
             .HasForeignKey(x => x.ActiveAssignedUserId)
             .OnDelete(DeleteBehavior.SetNull);
     }

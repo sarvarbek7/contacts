@@ -7,6 +7,7 @@ public static class MapUserGroup
         var users = route.MapGroup(Routes.Users).WithTags(Tags.Users);
 
         users.MapPostUsers();
+        users.MapUserByExternalId();
 
         return users;
     }

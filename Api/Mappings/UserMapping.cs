@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Contacts.Contracts.Users;
+using LinqKit;
 
 namespace Contacts.Api.Mappings;
 
@@ -17,7 +18,18 @@ public static class UserMapping
         };
     }
 
-    public static Expression<Func<Domain.Users.User, User>> DomainUserToContractUser =>
+    public static Expression<Func<Domain.Users.User, UserListItem>> UserDomainToListItem =>
+        x => new UserListItem()
+        {
+            Id = x.Id,
+            ExternalId = x.ExternalId,
+            FirstName = x.FirstName,
+            LastName = x.LastName,
+            MiddleName = x.MiddleName,
+            Photo = x.Photo,
+        };
+    
+    public static Expression<Func<Domain.Users.User, User>> UserDomainToContract =>
         x => new User()
         {
             Id = x.Id,
@@ -25,6 +37,8 @@ public static class UserMapping
             FirstName = x.FirstName,
             LastName = x.LastName,
             MiddleName = x.MiddleName,
-            Photo = x.Photo
+            Photo = x.Photo,
+            History = x.PhoneNumberHistory.Select(PhoneNumberMapping.UserPhoneNumberToPhoneNumberHistoryItem.Invoke).ToList(),
+            ActivePhoneNumbers = x.ActivePhoneNumbers.Select(PhoneNumberMapping.PhoneNumberToListItem.Invoke).ToList()
         };
 }

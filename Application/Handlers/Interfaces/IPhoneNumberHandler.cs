@@ -8,6 +8,7 @@ namespace Contacts.Application.Handlers.Interfaces;
 public interface IPhoneNumberHandler
 {
     Task<ErrorOr<Success>> HandleAssignPhoneNumber(AssignPhoneNumberMessage message, CancellationToken cancellationToken = default);
+    Task<ErrorOr<Success>> HandleRemovePhoneNumber(RemovePhoneNumberMessage message, CancellationToken cancellationToken = default);
     Task<ErrorOr<Created>> HandleCreate(CreatePhoneNumberMessage message, CancellationToken cancellationToken = default);
     Task<ErrorOr<Updated>> HandleUpdate(UpdatePhoneNumberMessage message, CancellationToken cancellationToken = default);
     Task<ErrorOr<Deleted>> HandleDelete(DeletePhoneNumberMessage message, CancellationToken cancellationToken = default);

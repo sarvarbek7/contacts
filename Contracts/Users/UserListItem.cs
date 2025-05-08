@@ -1,8 +1,6 @@
-using Contacts.Contracts.PhoneNumbers;
-
 namespace Contacts.Contracts.Users;
 
-public record User
+public record UserListItem
 {
     public int Id { get; init; }
     public int ExternalId { get; init; }
@@ -10,6 +8,4 @@ public record User
     public required string LastName { get; set; }
     public string? MiddleName { get; set; }
     public string? Photo { get; set; }
-    public List<PhoneNumberListItem> ActivePhoneNumbers { get; set; } = [];
-    public List<PhoneNumberHistoryItem> History { get; set; } = [];
 }
