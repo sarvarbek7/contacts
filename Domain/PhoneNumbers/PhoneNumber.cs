@@ -10,7 +10,7 @@ public class PhoneNumber : IEntity<Guid>,
     IDeletedByAccountAudit
 {
     public Guid Id { get; init; }
-    public string Number { get; set; }
+    public required string Number { get; set; }
     public int? ActiveAssignedUserId { get; set; }
     public User? ActiveAssignedUser { get; set; }
     public List<UserPhoneNumber> UsersHistory { get; set; } = [];
@@ -24,4 +24,25 @@ public class PhoneNumber : IEntity<Guid>,
     public Account? DeletedBy { get; set; }
     public int? DeletedById { get; set; }
     public bool IsDeleted { get; set; }
+
+    public void AssignUser(User user, int accountId)
+    {
+        ActiveAssignedUser = user;
+
+        foreach (var history in UsersHistory.Where(x => x.IsActive))
+        {
+            history.IsActive = false;
+        }
+
+        var newHistory = new UserPhoneNumber()
+        {
+            // TODO: Fix later accountId
+            CreatedById = null, // accountId,
+            CreatedAt = DateTime.UtcNow,
+            IsActive = true,
+            User = user
+        };
+
+        UsersHistory.Add(newHistory);
+    }
 }

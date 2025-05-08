@@ -24,6 +24,13 @@ public static class PhoneNumberMapping
         return new ListPhoneNumbersMessage(query.ToPagination(), query.Search);
     }
 
+    public static AssignPhoneNumberMessage MapTo(this AssignPhoneNumberRequest request,
+                                                 Guid id,
+                                                 int accountId)
+    {
+        return new (request.User.MapTo(), id, accountId);
+    }
+
     public static Expression<Func<PhoneNumber, PhoneNumberListItem>> PhoneNumberToListItem =>
         x => new PhoneNumberListItem(x.Id,
                                      x.Number,

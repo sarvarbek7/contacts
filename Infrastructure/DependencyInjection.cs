@@ -42,6 +42,7 @@ public static class DependencyInjection
     private static void AddHandlers(IServiceCollection services)
     {
         services.AddScoped<IPhoneNumberHandler, PhoneNumberHandler>();
+        services.AddScoped<IUserHandler, UserHandler>();
     }
 
     private static void AddRepositories(IServiceCollection services)

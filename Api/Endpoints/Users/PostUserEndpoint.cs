@@ -1,5 +1,6 @@
 using Application.Services.Foundations;
 using Contacts.Api.Mappings;
+using Contacts.Application.Handlers.Interfaces;
 using Contacts.Domain.Users;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,19 +15,11 @@ public static class PostUserEndpoint
     }
 
     static async Task Handler([FromBody] Contracts.Users.HrmUser user,
-       [FromServices] IBaseService<User, int> userService,
+       [FromServices] IUserHandler handler,
        [FromServices] HttpContext httpContext)
     {
-        bool userExists = await userService.GetAll(x => x.ExternalId == user.Id)
-            .AnyAsync(httpContext.RequestAborted);
-
-        if (userExists)
-        {
-            return;
-        }
-
         var domainUser = user.MapTo();
 
-        await userService.Add(domainUser, true, httpContext.RequestAborted);
+        await handler.HandleAddOrGetUser(domainUser, httpContext.RequestAborted);
     }
 }

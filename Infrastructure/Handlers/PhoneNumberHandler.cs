@@ -1,15 +1,53 @@
+using System.Net.Cache;
 using Application.Common;
+using Application.Errors;
 using Application.Services.Foundations;
 using Contacts.Application.Handlers.Interfaces;
 using Contacts.Application.Handlers.Messages.PhoneNumbers;
 using Contacts.Domain.PhoneNumbers;
+using Contacts.Domain.Users;
 using ErrorOr;
 using Microsoft.EntityFrameworkCore;
 
 namespace Contacts.Infrastructure.Handlers;
 
-class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService) : IPhoneNumberHandler
+class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
+                         IUserHandler userHandler) : IPhoneNumberHandler
 {
+    public async Task<ErrorOr<Success>> HandleAssignPhoneNumber(AssignPhoneNumberMessage message, CancellationToken cancellationToken = default)
+    {
+        var errorOrUser = await userHandler.HandleAddOrGetUser(message.User, cancellationToken);
+
+        if (errorOrUser.IsError)
+        {
+            return errorOrUser.FirstError;
+        }
+
+        var user = errorOrUser.Value;
+
+        var phoneNumber = await phoneNumberService.GetAll(x => x.Id == message.PhoneNumberId, tracked: true)
+            .Include(x => x.ActiveAssignedUser)
+            .Include(x => x.UsersHistory.Where(x => x.IsActive == true))
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (phoneNumber is null)
+        {
+            return ApplicationErrors.EntityNotFound<PhoneNumber, Guid>(message.PhoneNumberId);
+        }
+
+        if (phoneNumber.ActiveAssignedUser is not null)
+        {
+            // TODO: already assigned first retain
+            throw new NotImplementedException();
+        }
+
+        phoneNumber.AssignUser(user, message.UserAccountIdWhoDoesAction);
+
+        await phoneNumberService.SaveChanges(cancellationToken);
+
+        return new Success();
+    }
+
     public async Task<ErrorOr<Created>> HandleCreate(CreatePhoneNumberMessage message,
                              CancellationToken cancellationToken = default)
     {
@@ -65,7 +103,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService) : I
         {
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
 #pragma warning disable CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
-            query = query.Where(x => x.Number.StartsWith(search) || 
+            query = query.Where(x => x.Number.StartsWith(search) ||
                                 x.ActiveAssignedUser.FirstName.ToLower().StartsWith(search) ||
                                 x.ActiveAssignedUser.LastName.ToLower().StartsWith(search) ||
                                 x.ActiveAssignedUser.MiddleName.ToLower().StartsWith(search));
