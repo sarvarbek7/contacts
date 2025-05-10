@@ -36,8 +36,7 @@ public class PhoneNumber : IEntity<Guid>,
 
         var newHistory = new UserPhoneNumber()
         {
-            // TODO: Fix later accountId
-            CreatedById = null, // accountId,
+            CreatedById = accountId,
             CreatedAt = DateTime.UtcNow,
             IsActive = true,
             User = user
@@ -56,7 +55,7 @@ public class PhoneNumber : IEntity<Guid>,
             history.RemovedAt = DateTime.UtcNow;
             
             // TODO: fix later
-            history.RemovedById = null; //accountId;
+            history.RemovedById = accountId;
         }
     }
 }

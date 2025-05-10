@@ -4,7 +4,6 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using Contacts.Application.Common.Exceptions;
-using Contacts.Application.Common.Extensions;
 using Contacts.Application.Common.Settings;
 using Contacts.Application.ProcessingServices;
 using Contacts.Application.ProcessingServices.Models.Responses.HrmPro;

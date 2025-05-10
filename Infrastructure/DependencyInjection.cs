@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using System.Net;
 using System.Reflection;
 using Application.Services.Foundations;
 using Contacts.Application.Handlers.Interfaces;
@@ -24,8 +22,15 @@ public static class DependencyInjection
         AddFoundationServices(services);
         AddHttpClients(services);
         AddHandlers(services);
+        AddProccessingServices(services);
 
         services.AddMemoryCache();
+    }
+
+    private static void AddProccessingServices(IServiceCollection services)
+    {
+        services.AddSingleton<IPasswordHashingService, PasswordHashingService>();
+        services.AddSingleton<IJwtTokenService, JwtTokenService>();
     }
 
     private static void AddHttpClients(IServiceCollection services)
@@ -43,6 +48,7 @@ public static class DependencyInjection
     {
         services.AddScoped<IPhoneNumberHandler, PhoneNumberHandler>();
         services.AddScoped<IUserHandler, UserHandler>();
+        services.AddScoped<IAuthHandler, AuthHandler>();
     }
 
     private static void AddRepositories(IServiceCollection services)

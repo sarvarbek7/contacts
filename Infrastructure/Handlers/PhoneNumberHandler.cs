@@ -54,7 +54,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
     {
         var phoneNumber = message.MapToPhoneNumber();
 
-        // phoneNumber.CreatedById = message.UserAccountIdWhoDoesAction;
+        phoneNumber.CreatedById = message.UserAccountIdWhoDoesAction;
         phoneNumber.CreatedAt = DateTime.UtcNow;
 
         bool phoneNumberExists = await phoneNumberService.GetAll(x => x.Number == phoneNumber.Number).AnyAsync(cancellationToken);
@@ -76,7 +76,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
         return await errorOrStoredPhoneNumber.MatchAsync<ErrorOr<Deleted>>(async v =>
             {
-                // v.DeletedById = message.UserAccountIdWhoDoesAction;
+                v.DeletedById = message.UserAccountIdWhoDoesAction;
                 v.DeletedAt = DateTime.UtcNow;
 
                 return await phoneNumberService.Delete(v, true, cancellationToken);
@@ -193,7 +193,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
         return await errorOrStoredPhoneNumber.MatchAsync<ErrorOr<Updated>>(async v =>
             {
                 v.Number = message.Number;
-                // v.UpdatedById = message.UserAccountIdWhoDoesAction;
+                v.UpdatedById = message.UserAccountIdWhoDoesAction;
                 v.UpdatedAt = DateTime.UtcNow;
 
                 return await phoneNumberService.Update(v, true, cancellationToken);

@@ -3,6 +3,12 @@ using Contacts.Infrastructure;
 using Contacts.Api.Endpoints.PhoneNumbers;
 using Contacts.Api.Endpoints.Hrm;
 using Contacts.Api.Endpoints.Users;
+using Contacts.Infrastructure.Persistance;
+using Contacts.Application.Common.Settings;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Contacts.Api.Endpoints.Auth;
+using Contacts.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,11 +25,34 @@ builder.Services.AddCors(options =>
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+});
+
 builder.Services.AddApplication(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Configuration.AddJsonFile("./appsettings.Production.json", false);
+
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
+
+builder.Services.AddAuthentication().AddJwtBearer(options =>
+{
+    var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()!;
+
+    options.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(jwtOptions.AccessTokenSecretKey)),
+    };
+});
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -36,10 +65,16 @@ if (app.Environment.IsDevelopment())
 app.UseCors();
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
+await Seeder.SeedData(app.Services);
+
 var api = app.MapGroup("api");
 
 api.MapPhoneNumbers();
 api.MapHrm();
 api.MapUsers();
+api.MapAuth();
 
 app.Run();

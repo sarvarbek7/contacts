@@ -2,6 +2,7 @@ using Application.Services.Foundations;
 using Contacts.Api.Mappings;
 using Contacts.Application.Handlers.Interfaces;
 using Contacts.Domain.Users;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,7 @@ public static class PostUserEndpoint
         return route.MapPost(Routes.Users, Handler);
     }
 
+    [Authorize]
     static async Task Handler([FromBody] Contracts.Users.HrmUser user,
        [FromServices] IUserHandler handler,
        [FromServices] HttpContext httpContext)

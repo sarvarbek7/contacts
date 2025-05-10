@@ -1,6 +1,7 @@
 using Contacts.Api.Mappings;
 using Contacts.Application.Handlers.Interfaces;
 using Contacts.Contracts.PhoneNumbers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,6 +14,7 @@ public static class CreatePhoneNumberEndpoint
         return route.MapPost(Routes.CreatePhoneNumber, Handler);
     }
 
+    [Authorize]
     static async Task<Results<NoContent, ProblemHttpResult>> Handler([FromBody] CreatePhoneNumberRequest request,
                               HttpContext context,
                               IPhoneNumberHandler phoneNumberHandler)

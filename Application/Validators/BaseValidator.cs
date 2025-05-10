@@ -15,7 +15,7 @@ internal abstract class BaseValidator<T, TId> : IValidator<T, TId>
         {
             if (auditable.CreatedById is null or 0)
             {
-                // TODO: throw MissingAuditException
+                throw new MissingAuditException();
             }
 
             if (auditable.CreatedAt == default)
@@ -35,7 +35,7 @@ internal abstract class BaseValidator<T, TId> : IValidator<T, TId>
         {
             if (auditable.DeletedById is null or 0)
             {
-                // TODO: throw MissingAuditException
+                throw new MissingAuditException();
             }
 
             if (auditable.DeletedAt == default)
@@ -55,7 +55,7 @@ internal abstract class BaseValidator<T, TId> : IValidator<T, TId>
         {
             if (auditable.UpdatedById is null or 0)
             {
-                // TODO: throw MissingAuditException
+                throw new MissingAuditException();
             }
 
             if (auditable.UpdatedAt == default)

@@ -1,5 +1,7 @@
+using Contacts.Api.Extensions;
 using Contacts.Application.Handlers.Interfaces;
 using Contacts.Application.Handlers.Messages.PhoneNumbers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,11 +14,12 @@ public static class DeletePhoneNumberEndpoint
         return route.MapDelete(Routes.DeletePhoneNumber, Handler);
     }
 
+    [Authorize]
     static async Task<Results<NoContent, ProblemHttpResult>> Handler([FromRoute] Guid id,
                         HttpContext context,
                         IPhoneNumberHandler phoneNumberHandler)
     {
-        var message = new DeletePhoneNumberMessage(id, 0);
+        var message = new DeletePhoneNumberMessage(id, context.GetUserId());
 
         var result = await phoneNumberHandler.HandleDelete(message, context.RequestAborted);
 
