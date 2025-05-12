@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Contacts.Application.Handlers.Messages.PhoneNumbers;
 using Contacts.Contracts.PhoneNumbers;
+using Contacts.Domain.PhoneNumbers;
 using LinqKit;
 
 namespace Contacts.Api.Mappings;
@@ -50,18 +51,20 @@ public static class PhoneNumberMapping
     public static Expression<Func<Domain.PhoneNumbers.PhoneNumber, PhoneNumberListItem>> PhoneNumberToListItem =>
         x => new PhoneNumberListItem(x.Id,
                                      x.Number,
-                                     x.ActiveAssignedUser == null ? null : UserMapping.UserDomainToListItem.Invoke(x.ActiveAssignedUser));
+                                     x.ActiveAssignedUser == null ? null : UserMapping.UserDomainToListItem.Invoke(x.ActiveAssignedUser),
+                                     x.ActiveAssignedPositionId);
 
-    public static Expression<Func<Domain.PhoneNumbers.PhoneNumber, PhoneNumber>> PhoneNumberDomainToContract =>
-        x => new PhoneNumber()
+    public static Expression<Func<Domain.PhoneNumbers.PhoneNumber, Contracts.PhoneNumbers.PhoneNumber>> PhoneNumberDomainToContract =>
+        x => new Contracts.PhoneNumbers.PhoneNumber()
         {
             Id = x.Id,
             Number = x.Number,
             ActiveAssignedUser = x.ActiveAssignedUser == null ? null : UserMapping.UserDomainToListItem.Invoke(x.ActiveAssignedUser),
-            History = x.UsersHistory.Select(y => UserPhoneNumberToUserHistoryItem.Invoke(y)).ToList()
+            History = x.UsersHistory.Select(u => UserPhoneNumberToUserHistoryItem.Invoke(u)).ToList(),
+            PositionHistory = x.PositionHistory.Select(p => UserPositionPhoneNumberToHistoryItem.Invoke(p)).ToList()
         };
 
-    public static Expression<Func<Domain.PhoneNumbers.UserPhoneNumber, PhoneNumberHistoryItem>> UserPhoneNumberToPhoneNumberHistoryItem =>
+    public static Expression<Func<UserPhoneNumber, PhoneNumberHistoryItem>> UserPhoneNumberToPhoneNumberHistoryItem =>
         x => new PhoneNumberHistoryItem()
         {
             Id = x.Id,
@@ -80,5 +83,17 @@ public static class PhoneNumberMapping
             IsActive = x.IsActive,
             CreatedAt = x.CreatedAt,
             RemovedAt = x.RemovedAt
+        };
+
+    public static Expression<Func<PositionPhoneNumber, PositionHistoryItem>> UserPositionPhoneNumberToHistoryItem =>
+        x => new PositionHistoryItem(){
+            Id = x.Id,
+            PositionId = x.PositionId,
+            Organization = x.Organization,
+            Department = x.Department,
+            Position = x.Position,
+            IsActive = x.IsActive,
+            CreatedAt = x.CreatedAt,
+            RemovedAt = x.RemovedAt,
         };
 }
