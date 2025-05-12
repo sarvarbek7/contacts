@@ -10,7 +10,7 @@ public class Account : IEntity<int>,
     public int Id { get; init; }
     public required string Login { get; set; }
     public required string Password { get; set; }
-    public Role? Role { get; set; }
+    public Role Role { get; set; }
     public DateTime CreatedAt { get; set; }
     public Account? CreatedBy { get; set; }
     public int? CreatedById { get; set; }

@@ -8,8 +8,10 @@ public static class Routes
     public const string UpdatePhoneNumber = "{id:guid}";
     public const string DeletePhoneNumber = "{id:guid}";
     public const string GetPhoneNumber ="{id:guid}";
-    public const string AssignPhoneNumber = "{id::guid}/assign";
-    public const string RemovePhoneNumber = "{id:guid}/remove";
+    public const string AssignUserPhoneNumber = "{id::guid}/assign/user";
+    public const string AssignPositionPhoneNumber = "{id::guid}/assign/position";
+    public const string RemoveUserPhoneNumber = "{id:guid}/remove/user";
+    public const string RemovePositionPhoneNumber = "{id:guid}/remove/position";
     public const string ListPhoneNumbers = "";
 }
 

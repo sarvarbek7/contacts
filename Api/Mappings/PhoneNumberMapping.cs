@@ -20,14 +20,31 @@ public static class PhoneNumberMapping
 
     public static ListPhoneNumbersMessage MapTo(this ListPhoneNumbersQuery query)
     {
-        return new ListPhoneNumbersMessage(query.ToPagination(), query.Number, query.User);
+        return new ListPhoneNumbersMessage(query.ToPagination(),
+                                           query.Number,
+                                           query.User,
+                                           query.Status,
+                                           query.UserExternalId,
+                                           query.PositionId);
     }
 
-    public static AssignPhoneNumberMessage MapTo(this AssignPhoneNumberRequest request,
+    public static AssignUserPhoneNumberMessage MapTo(this AssignPhoneNumberRequest request,
                                                  Guid id,
                                                  int accountId)
     {
         return new(request.User.MapTo(), id, accountId);
+    }
+
+    public static AssignPositionPhoneNumberMessage MapTo(this AssignPositionPhoneNumberRequest request,
+                                                 Guid id,
+                                                 int accountId)
+    {
+        return new(request.PositionId,
+                   request.Organization,
+                   request.Department,
+                   request.Position,
+                   id,
+                   accountId);
     }
 
     public static Expression<Func<Domain.PhoneNumbers.PhoneNumber, PhoneNumberListItem>> PhoneNumberToListItem =>

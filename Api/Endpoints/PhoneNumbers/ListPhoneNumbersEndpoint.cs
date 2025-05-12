@@ -1,11 +1,8 @@
-using Application.Common;
 using Contacts.Api.Mappings;
 using Contacts.Application.Handlers.Interfaces;
 using Contacts.Contracts.PhoneNumbers;
-using Contacts.Domain.PhoneNumbers;
 using Contracts.Common;
 using LinqKit;
-using LinqKit.Core;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 

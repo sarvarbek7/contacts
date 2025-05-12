@@ -48,7 +48,9 @@ public static class DependencyInjection
     {
         services.AddScoped<IPhoneNumberHandler, PhoneNumberHandler>();
         services.AddScoped<IUserHandler, UserHandler>();
+        services.AddScoped<IAccountHandler, AccountHandler>();
         services.AddScoped<IAuthHandler, AuthHandler>();
+        services.AddScoped<IHrmHandler, HrmHandler>();
     }
 
     private static void AddRepositories(IServiceCollection services)

@@ -1,4 +1,6 @@
+using Contacts.Application.Handlers.Messages.Accounts;
 using Contacts.Application.Handlers.Messages.Auth;
+using Contacts.Application.ProcessingServices.Models.Responses.Auth;
 using Contacts.Contracts.Auth;
 using Contacts.Domain.Accounts;
 
@@ -9,15 +11,15 @@ public static class AuthMapping
     public static LoginMessage MapTo(this LoginRequest request) =>
         new(request.Login, request.Password);
 
-    public static CreateAccountMessage MapTo(this CreateAccountRequest request, int accountId)
+    public static Contracts.Auth.LoginResponse MapTo(this Application.ProcessingServices.Models.Responses.Auth.LoginResponse response)
     {
-        Role? role = null;
-
-        if (request.Role is not null)
+        return new Contracts.Auth.LoginResponse()
         {
-            role = Enum.Parse<Role>(request.Role, ignoreCase: true);
-        }
-
-        return new(request.Login, request.Password, role, accountId);
+            AccessToken = response.AccessToken,
+            RefreshToken = response.RefreshToken,
+            AccessTokenExpiresAt = response.AccessTokenExpiresAt,
+            RefreshTokenExpiresAt = response.RefreshTokenExpiresAt,
+            Account = response.Account.MapTo()
+        };
     }
 }

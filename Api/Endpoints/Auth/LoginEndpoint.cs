@@ -1,6 +1,5 @@
 using Contacts.Api.Mappings;
 using Contacts.Application.Handlers.Interfaces;
-using Contacts.Application.ProcessingServices.Models.Responses.Auth;
 using Contacts.Contracts.Auth;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +19,10 @@ public static class LoginEndpoint
     {
         var message = request.MapTo();
 
-        return TypedResults.Ok(await authHandler.HandleLogin(message, 
-            context.RequestAborted));
+        var result = await authHandler.HandleLogin(message,
+            context.RequestAborted);
+
+
+        return TypedResults.Ok(result.MapTo());
     }
 }

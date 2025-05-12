@@ -6,12 +6,14 @@ public static class PhoneNumbersGroup
     {
         var group = route.MapGroup(Routes.PhoneNumbers).WithTags(Tags.PhoneNumbers);
 
-        group.MapAssignPhoneNumber();
+        group.MapAssignUserPhoneNumber();
+        group.MapPositionAssignPhoneNumber();
         group.MapCreatePhoneNumber();
         group.MapDeletePhoneNumberNumber();
         group.MapGetPhoneNumberNumber();
         group.MapListPhoneNumbers();
-        group.MapRetainPhoneNumber();
+        group.MapRemovePhoneNumberFromUser();
+        group.MapRemovePhoneNumberFromPosition();
         group.MapUpdatePhoneNumber();
 
         return group;

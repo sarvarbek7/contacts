@@ -13,7 +13,9 @@ public class PhoneNumber : IEntity<Guid>,
     public required string Number { get; set; }
     public int? ActiveAssignedUserId { get; set; }
     public User? ActiveAssignedUser { get; set; }
+    public int? ActiveAssignedPositionId { get; set; }
     public List<UserPhoneNumber> UsersHistory { get; set; } = [];
+    public List<PositionPhoneNumber> PositionHistory { get; set; } = [];
     public DateTime CreatedAt { get; set; }
     public Account? CreatedBy { get; set; }
     public int? CreatedById { get; set; }
@@ -45,7 +47,7 @@ public class PhoneNumber : IEntity<Guid>,
         UsersHistory.Add(newHistory);
     }
 
-    public void UnAssign(int accountId)
+    public void UnAssignUser(int accountId)
     {
         ActiveAssignedUserId = null;
 
@@ -53,8 +55,40 @@ public class PhoneNumber : IEntity<Guid>,
         {
             history.IsActive = false;
             history.RemovedAt = DateTime.UtcNow;
-            
-            // TODO: fix later
+            history.RemovedById = accountId;
+        }
+    }
+
+    public void AssignPosition(int positionId,
+                               string organization,
+                               string department,
+                               string position,
+                               int accountId)
+    {
+        ActiveAssignedPositionId = positionId;
+
+        var positionPhoneHistory = new PositionPhoneNumber()
+        {
+            PositionId = positionId,
+            Organization = organization,
+            Department = department,
+            Position = position,
+            IsActive = true,
+            CreatedById = accountId,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        PositionHistory.Add(positionPhoneHistory);
+    }
+
+    public void UnAssignPosition(int accountId)
+    {
+        ActiveAssignedPositionId = null;
+
+        foreach (var history in PositionHistory.Where(x => x.IsActive))
+        {
+            history.IsActive = false;
+            history.RemovedAt = DateTime.UtcNow;
             history.RemovedById = accountId;
         }
     }

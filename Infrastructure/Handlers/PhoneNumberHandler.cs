@@ -6,6 +6,7 @@ using Application.Services.Foundations;
 using Contacts.Application.Handlers.Interfaces;
 using Contacts.Application.Handlers.Messages.PhoneNumbers;
 using Contacts.Domain.PhoneNumbers;
+using Contacts.Shared;
 using ErrorOr;
 using LinqKit;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,7 @@ namespace Contacts.Infrastructure.Handlers;
 class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
                          IUserHandler userHandler) : IPhoneNumberHandler
 {
-    public async Task<ErrorOr<Success>> HandleAssignPhoneNumber(AssignPhoneNumberMessage message, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<Success>> HandleUserAssignPhoneNumber(AssignUserPhoneNumberMessage message, CancellationToken cancellationToken = default)
     {
         var errorOrUser = await userHandler.HandleAddOrGetUser(message.User, cancellationToken);
 
@@ -92,7 +93,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
     {
         return await phoneNumberService.GetById(message.Id,
                                                 tracked: true,
-                                                includeStrings: [nameof(PhoneNumber.ActiveAssignedUser), 
+                                                includeStrings: [nameof(PhoneNumber.ActiveAssignedUser),
                                                 $"{nameof(PhoneNumber.UsersHistory)}.{nameof(UserPhoneNumber.User)}"],
                                                 cancellationToken: cancellationToken);
 
@@ -104,7 +105,31 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
         if (message.Number?.Trim().ToLower() is { } number)
         {
-            query = query.Where(x => EF.Functions.ILike(x.Number, $"%number%"));
+            query = query.Where(x => EF.Functions.ILike(x.Number, $"%{number}%"));
+        }
+
+        if (message.UserExternalId is { } userExternalId)
+        {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+            query = query.Where(x => x.ActiveAssignedUser.ExternalId == userExternalId);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+        }
+
+        if (message.PositionId is { } positionId)
+        {
+            query = query.Where(x => x.ActiveAssignedPositionId == positionId);
+        }
+
+        if (message.Status is { } status)
+        {
+            query = status switch
+            {
+                Status.NotAssigned => query.Where(x => x.ActiveAssignedPositionId == null && x.ActiveAssignedUserId == null),
+                Status.AssignedToUser => query.Where(x => x.ActiveAssignedUserId != null && x.ActiveAssignedPositionId == null),
+                Status.AssignedToPosition => query.Where(x => x.ActiveAssignedUserId == null && x.ActiveAssignedPositionId != null),
+                Status.AssignedToPosition | Status.AssignedToUser => query.Where(x => x.ActiveAssignedPositionId != null || x.ActiveAssignedPositionId == null),
+                _ => query,
+            };
         }
 
         if (message.User?.Trim().ToLower() is { } user)
@@ -120,28 +145,13 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
                 if (temp.Length >= 3)
                 {
-                    predicate.Or(x => EF.Functions.ILike(x.ActiveAssignedUser.LastName, $"%{temp}%"));
-                }
-
-            }
-
-            foreach (var name in names)
-            {
-                var temp = name;
-
-                if (temp.Length >= 3)
-                {
-                    predicate.Or(x => EF.Functions.ILike(x.ActiveAssignedUser.FirstName, $"%{temp}%"));
-                }
-            }
-
-            foreach (var name in names)
-            {
-                var temp = name;
-
-                if (temp.Length >= 3)
-                {
-                    predicate.Or(x => EF.Functions.ILike(x.ActiveAssignedUser.MiddleName, $"%{temp}%"));
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+#pragma warning disable CS8604 // Possible null reference argument.
+                    predicate.Or(x => EF.Functions.ILike(x.ActiveAssignedUser.LastName, $"%{temp}%"))
+                             .Or(x => EF.Functions.ILike(x.ActiveAssignedUser.FirstName, $"%{temp}%"))
+                             .Or(x => EF.Functions.ILike(x.ActiveAssignedUser.MiddleName, $"%{temp}%"));
+#pragma warning restore CS8604 // Possible null reference argument.
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 }
             }
 
@@ -166,7 +176,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
         return new ListResult<PhoneNumber>(query, message.Pagination, total);
     }
 
-    public async Task<ErrorOr<Success>> HandleRemovePhoneNumber(RemovePhoneNumberMessage message, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<Success>> HandleRemovePhoneNumber(RemoveUserPhoneNumberMessage message, CancellationToken cancellationToken = default)
     {
         var phoneNumber = await phoneNumberService.GetAll(x => x.Id == message.Id, tracked: true)
             .Include(x => x.UsersHistory.Where(x => x.IsActive == true))
@@ -177,7 +187,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
             return ApplicationErrors.EntityNotFound<PhoneNumber, Guid>(message.Id);
         }
 
-        phoneNumber.UnAssign(message.UserAccountIdWhoDoesAction);
+        phoneNumber.UnAssignUser(message.UserAccountIdWhoDoesAction);
 
         await phoneNumberService.SaveChanges(cancellationToken);
 
@@ -203,5 +213,45 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
                 return e;
             });
+    }
+
+    public async Task<ErrorOr<Success>> HandlePositionAssignPhoneNumber(AssignPositionPhoneNumberMessage message, CancellationToken cancellationToken = default)
+    {
+        var phoneNumber = await phoneNumberService.GetAll(x => x.Id == message.PhoneNumberId, tracked: true)
+            .Include(x => x.PositionHistory.Where(x => x.IsActive == true))
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (phoneNumber is null)
+        {
+            return ApplicationErrors.EntityNotFound<PhoneNumber, Guid>(message.PhoneNumberId);
+        }
+
+        phoneNumber.AssignPosition(message.PositionId,
+                                   message.Organization,
+                                   message.Department,
+                                   message.Position,
+                                   message.UserAccountIdWhoDoesAction);
+
+        await phoneNumberService.SaveChanges(cancellationToken);
+
+        return new Success();
+    }
+
+    public async Task<ErrorOr<Success>> HandleRemovePhoneNumberFromPosition(RemovePositionPhoneNumberMessage message, CancellationToken cancellationToken = default)
+    {
+        var phoneNumber = await phoneNumberService.GetAll(x => x.Id == message.Id, tracked: true)
+            .Include(x => x.PositionHistory.Where(x => x.IsActive == true))
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (phoneNumber is null)
+        {
+            return ApplicationErrors.EntityNotFound<PhoneNumber, Guid>(message.Id);
+        }
+
+        phoneNumber.UnAssignPosition(message.UserAccountIdWhoDoesAction);
+
+        await phoneNumberService.SaveChanges(cancellationToken);
+
+        return new Success();
     }
 }

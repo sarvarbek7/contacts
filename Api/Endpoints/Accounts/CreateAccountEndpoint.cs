@@ -5,18 +5,18 @@ using Contacts.Contracts.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Contacts.Api.Endpoints.Auth;
+namespace Contacts.Api.Endpoints.Accounts;
 
 public static class CreateAccountEndpoint
 {
-    public static RouteHandlerBuilder MapCreateAccount(this IEndpointRouteBuilder route)
+    public static RouteHandlerBuilder MapCreateAccount(this RouteGroupBuilder route)
     {
         return route.MapPost(Routes.CreateAccount, Handler);
     }
 
     [Authorize(Roles = "SuperAdmin")]
     private static async Task Handler([FromBody] CreateAccountRequest request,
-                                [FromServices] IAuthHandler authHandler,
+                                [FromServices] IAccountHandler authHandler,
                                 HttpContext context)
     {
         var message = request.MapTo(context.GetUserId());

@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Contacts.Api.Endpoints.Auth;
 using Contacts.Api;
+using Contacts.Api.Endpoints.Accounts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -76,5 +77,6 @@ api.MapPhoneNumbers();
 api.MapHrm();
 api.MapUsers();
 api.MapAuth();
+api.MapAccounts();
 
 app.Run();

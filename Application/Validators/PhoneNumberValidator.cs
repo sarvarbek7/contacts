@@ -45,18 +45,21 @@ internal class PhoneNumberValidator : BaseValidator<PhoneNumber, Guid>, IValidat
         {
             return errors;
         }
-        
+
         return base.ValidateOnUpdate(model);
     }
 
     private static ErrorOr<Success> ValidateNumberField(string number)
     {
-        if (string.IsNullOrWhiteSpace(number))
+        if (number is { Length: 5 } validLengthNumber)
         {
-            // TODO: return InvalidPhoneNumber error
-            throw new NotImplementedException();
+            if (!validLengthNumber.All(char.IsNumber))
+            {
+                return new Success();
+            }
         }
 
-        return new Success();
+        // TODO: return InvalidPhoneNumber error
+        throw new NotImplementedException();
     }
 }

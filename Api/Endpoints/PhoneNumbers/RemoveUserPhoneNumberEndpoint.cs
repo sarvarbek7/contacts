@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Contacts.Api.Endpoints.PhoneNumbers;
 
-public static class RemovePhoneNumberEndpoint
+public static class RemoveUserPhoneNumberEndpoint
 {
-    public static RouteHandlerBuilder MapRetainPhoneNumber(this RouteGroupBuilder route)
+    public static RouteHandlerBuilder MapRemovePhoneNumberFromUser(this RouteGroupBuilder route)
     {
-        return route.MapPut(Routes.RemovePhoneNumber, Handler);
+        return route.MapPut(Routes.RemoveUserPhoneNumber, Handler);
     }
 
     [Authorize]
@@ -18,7 +18,7 @@ public static class RemovePhoneNumberEndpoint
                               IPhoneNumberHandler handler,
                               HttpContext context)
     {
-        var removePhoneNumberMessage = new RemovePhoneNumberMessage(id, context.GetUserId());
+        var removePhoneNumberMessage = new RemoveUserPhoneNumberMessage(id, context.GetUserId());
 
         await handler.HandleRemovePhoneNumber(removePhoneNumberMessage,
                                               context.RequestAborted);

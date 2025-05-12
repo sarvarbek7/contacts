@@ -7,21 +7,21 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Contacts.Api.Endpoints.PhoneNumbers;
 
-public static class AssignPhoneNumberEndpoint
+public static class AssignPositionPhoneNumberEndpoint
 {
-    public static RouteHandlerBuilder MapAssignPhoneNumber(this RouteGroupBuilder route)
+    public static RouteHandlerBuilder MapPositionAssignPhoneNumber(this RouteGroupBuilder route)
     {
-        return route.MapPut(Routes.AssignPhoneNumber, Handler);
+        return route.MapPut(Routes.AssignPositionPhoneNumber, Handler);
     }
 
     [Authorize]
     static async Task Handler([FromRoute] Guid id,
-                        [FromBody] AssignPhoneNumberRequest request,
+                        [FromBody] AssignPositionPhoneNumberRequest request,
                         HttpContext context,
                         IPhoneNumberHandler handler)
     {
         var message = request.MapTo(id, context.GetUserId());
 
-        await handler.HandleAssignPhoneNumber(message, context.RequestAborted);
+        await handler.HandlePositionAssignPhoneNumber(message, context.RequestAborted);
     }
 }

@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "common\In
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contacts.Api", "Api\Contacts.Api.csproj", "{B1009A5F-B26C-4216-9DE5-9DC7B8FD47A9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contacts.Shared", "Shared\Contacts.Shared.csproj", "{19C000D5-05BB-4EFB-B6DE-DE2ABFDAC03B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -68,6 +70,10 @@ Global
 		{B1009A5F-B26C-4216-9DE5-9DC7B8FD47A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1009A5F-B26C-4216-9DE5-9DC7B8FD47A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B1009A5F-B26C-4216-9DE5-9DC7B8FD47A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19C000D5-05BB-4EFB-B6DE-DE2ABFDAC03B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19C000D5-05BB-4EFB-B6DE-DE2ABFDAC03B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19C000D5-05BB-4EFB-B6DE-DE2ABFDAC03B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19C000D5-05BB-4EFB-B6DE-DE2ABFDAC03B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{3E4CA4E9-8567-48A6-9455-06F1FA32432E} = {7FC23C07-2237-4481-AECF-E107ABD5FC25}

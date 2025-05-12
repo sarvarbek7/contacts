@@ -9,7 +9,4 @@ public interface IAuthHandler
 {
     public Task<LoginResponse> HandleLogin(LoginMessage message,
                                            CancellationToken cancellationToken = default);
-
-    public Task<ErrorOr<Account>> HandleCreateAccount(CreateAccountMessage message,
-                                                      CancellationToken cancellationToken = default);
 }
