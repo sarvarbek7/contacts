@@ -34,7 +34,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
         if (phoneNumber is null)
         {
-            return ApplicationErrors.EntityNotFound<PhoneNumber, Guid>(message.PhoneNumberId);
+            return ApplicationErrors.EntityNotFoundForGivenId<PhoneNumber, Guid>(message.PhoneNumberId);
         }
 
         if (phoneNumber.ActiveAssignedUser is not null)
@@ -120,6 +120,11 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
             query = query.Where(x => x.ActiveAssignedPositionId == positionId);
         }
 
+        if (message.Positions.Count > 0)
+        {
+            query = query.Where(x => message.Positions.Contains(x.ActiveAssignedPositionId!.Value));
+        }
+
         if (message.Status is { } status)
         {
             query = status switch
@@ -184,7 +189,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
         if (phoneNumber is null)
         {
-            return ApplicationErrors.EntityNotFound<PhoneNumber, Guid>(message.Id);
+            return ApplicationErrors.EntityNotFoundForGivenId<PhoneNumber, Guid>(message.Id);
         }
 
         phoneNumber.UnAssignUser(message.UserAccountIdWhoDoesAction);
@@ -223,13 +228,10 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
         if (phoneNumber is null)
         {
-            return ApplicationErrors.EntityNotFound<PhoneNumber, Guid>(message.PhoneNumberId);
+            return ApplicationErrors.EntityNotFoundForGivenId<PhoneNumber, Guid>(message.PhoneNumberId);
         }
 
         phoneNumber.AssignPosition(message.PositionId,
-                                   message.Organization,
-                                   message.Department,
-                                   message.Position,
                                    message.UserAccountIdWhoDoesAction);
 
         await phoneNumberService.SaveChanges(cancellationToken);
@@ -245,7 +247,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
         if (phoneNumber is null)
         {
-            return ApplicationErrors.EntityNotFound<PhoneNumber, Guid>(message.Id);
+            return ApplicationErrors.EntityNotFoundForGivenId<PhoneNumber, Guid>(message.Id);
         }
 
         phoneNumber.UnAssignPosition(message.UserAccountIdWhoDoesAction);

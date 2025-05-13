@@ -3,6 +3,7 @@ using Contacts.Application.Handlers.Messages.PhoneNumbers;
 using Contacts.Contracts.PhoneNumbers;
 using Contacts.Domain.PhoneNumbers;
 using LinqKit;
+using Mappings;
 
 namespace Contacts.Api.Mappings;
 
@@ -21,12 +22,20 @@ public static class PhoneNumberMapping
 
     public static ListPhoneNumbersMessage MapTo(this ListPhoneNumbersQuery query)
     {
+        List<int> positions = [];
+
+        if (query.Positions is { } positionsQuery)
+        {
+            positions.AddRange(positionsQuery.Split(',').Select(int.Parse));
+        }
+
         return new ListPhoneNumbersMessage(query.ToPagination(),
                                            query.Number,
                                            query.User,
                                            query.Status,
                                            query.UserExternalId,
-                                           query.PositionId);
+                                           query.PositionId,
+                                           positions);
     }
 
     public static AssignUserPhoneNumberMessage MapTo(this AssignPhoneNumberRequest request,
@@ -41,9 +50,6 @@ public static class PhoneNumberMapping
                                                  int accountId)
     {
         return new(request.PositionId,
-                   request.Organization,
-                   request.Department,
-                   request.Position,
                    id,
                    accountId);
     }
@@ -86,12 +92,10 @@ public static class PhoneNumberMapping
         };
 
     public static Expression<Func<PositionPhoneNumber, PositionHistoryItem>> UserPositionPhoneNumberToHistoryItem =>
-        x => new PositionHistoryItem(){
+        x => new PositionHistoryItem()
+        {
             Id = x.Id,
             PositionId = x.PositionId,
-            Organization = x.Organization,
-            Department = x.Department,
-            Position = x.Position,
             IsActive = x.IsActive,
             CreatedAt = x.CreatedAt,
             RemovedAt = x.RemovedAt,

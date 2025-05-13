@@ -1,4 +1,5 @@
 using Contacts.Shared;
+using Contracts.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Contacts.Contracts.PhoneNumbers;
@@ -19,4 +20,7 @@ public record ListPhoneNumbersQuery : PagedRecordQuery
 
     [FromQuery(Name = "positionId")]
     public int? PositionId { get; init; }
+
+    [FromQuery(Name = "positions")]
+    public string? Positions { get; init; }
 }

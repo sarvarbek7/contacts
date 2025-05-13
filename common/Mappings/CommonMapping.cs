@@ -1,8 +1,8 @@
-using Application.Common;
-using Contacts.Contracts;
+﻿using Application.Common;
 using Contracts.Common;
 
-namespace Contacts.Api.Mappings;
+namespace Mappings;
+
 
 public static class CommonMapping
 {
@@ -16,7 +16,8 @@ public static class CommonMapping
         return new Pagination(query.Page, query.PageSize);
     }
 
-    public static ListResponse<T> ToListResponse<T>(this IEnumerable<T> result, PageDetail pageDetails)
+    public static ListResponse<T> ToListResponse<T>(this IEnumerable<T> result,
+                                                    PageDetail pageDetails)
     {
         return new ListResponse<T>
         {

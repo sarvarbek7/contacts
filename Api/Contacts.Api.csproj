@@ -19,6 +19,7 @@
     <ProjectReference Include="../Application/Contacts.Application.csproj" />
     <ProjectReference Include="../Contracts/Contacts.Contracts.csproj" />
     <ProjectReference Include="../Infrastructure/Contacts.Infrastructure.csproj" />
+    <ProjectReference Include="../common/Mappings/Mappings.csproj" />
   </ItemGroup>
 
 </Project>

@@ -3,6 +3,7 @@ using Contacts.Application.Handlers.Messages.Accounts;
 using Contacts.Contracts.Accounts;
 using Contacts.Contracts.Auth;
 using Contacts.Domain.Accounts;
+using Mappings;
 
 namespace Contacts.Api.Mappings;
 

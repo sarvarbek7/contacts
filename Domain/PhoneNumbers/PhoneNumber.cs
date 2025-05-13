@@ -60,9 +60,6 @@ public class PhoneNumber : IEntity<Guid>,
     }
 
     public void AssignPosition(int positionId,
-                               string organization,
-                               string department,
-                               string position,
                                int accountId)
     {
         ActiveAssignedPositionId = positionId;
@@ -70,9 +67,6 @@ public class PhoneNumber : IEntity<Guid>,
         var positionPhoneHistory = new PositionPhoneNumber()
         {
             PositionId = positionId,
-            Organization = organization,
-            Department = department,
-            Position = position,
             IsActive = true,
             CreatedById = accountId,
             CreatedAt = DateTime.UtcNow

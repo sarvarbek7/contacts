@@ -3,6 +3,7 @@ using Contacts.Application.Handlers.Interfaces;
 using Contacts.Contracts.Accounts;
 using Contracts.Common;
 using LinqKit;
+using Mappings;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

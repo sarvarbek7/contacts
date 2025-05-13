@@ -5,6 +5,7 @@ using Contracts.Common;
 using LinqKit;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Mappings;
 
 namespace Contacts.Api.Endpoints.PhoneNumbers;
 

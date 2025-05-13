@@ -1,6 +1,5 @@
 using Application.Validators;
 using Contacts.Domain.Accounts;
-using ErrorOr;
 
 namespace Contacts.Application.Validators;
 
