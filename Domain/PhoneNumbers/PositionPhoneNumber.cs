@@ -10,6 +10,9 @@ public class PositionPhoneNumber : IEntity<long>,
     public bool IsActive { get; set; }
     public Guid PhoneNumberId { get; init; }
     public PhoneNumber? PhoneNumber { get; set; }
+    public required string Organization { get; set; }
+    public required string Department { get; set; }
+    public required string Position { get; set; }
     public int PositionId { get; init; }
     public DateTime CreatedAt { get; set; }
     public Account? CreatedBy { get; set; }

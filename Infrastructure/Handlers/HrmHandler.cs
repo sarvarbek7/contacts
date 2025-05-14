@@ -3,7 +3,9 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Application.Services.Foundations;
 using Contacts.Application.Handlers.Interfaces;
+using Contacts.Application.Handlers.Responses;
 using Contacts.Application.ProcessingServices;
+using Contacts.Application.ProcessingServices.Models.Responses.HrmPro;
 using Contacts.Domain.PhoneNumbers;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,43 +14,15 @@ namespace Contacts.Infrastructure.Handlers;
 internal class HrmHandler(IHrmProClient httpClient,
                           IBaseService<PhoneNumber, Guid> phoneNumberService) : IHrmHandler
 {
-    public async Task<ExpandoObject> GetPositionsWithPhoneNumbers(string queryParams, CancellationToken cancellationToken = default)
+    public async Task<ResponseWrapper<ListResponse<PositionWithPhoneNumber>>> GetPositionsWithPhoneNumbers(string queryParams, CancellationToken cancellationToken = default)
     {
-//         {
-//   "message": true,
-//   "error": false,
-//   "data": {
-//     "current_page": 1,
-//     "total": 1,
-//     "data": [
-//       {
-//         "id": 1,
-//         "position": {
-//           "id": 84,
-//           "name": "boshqaruv raisi"
-//         },
-//         "rate": 1,
-//         "real_rate": 1
-//       }
-//     ]
-//   }
-// }
         var login = await httpClient.Login(cancellationToken);
 
-        dynamic positionsResponse = await httpClient.GetPositions(login.TokenValue, queryParams, cancellationToken);
+        var positionsResponse = await httpClient.GetPositions(login.TokenValue, queryParams, cancellationToken);
 
-        List<(int index, int workerId)> bag = [];
+        var positions = positionsResponse.Data.Data;
 
-        JsonElement positionData = positionsResponse.data.GetProperty("data");
-
-        var positions = JsonArray.Create(positionData)!;
-
-        for (int i = 0; i < positions.Count; i++)
-        {
-            bag.Add((i, (int)positions[i]!["position"]!["id"]!));
-        }
-
-        var positionIds = bag.Select(x => x.workerId).ToList();
+        var positionIds = positions.Select(x => x.Id).ToList();
 
         List<PhoneNumber> phoneNumbers = [];
 
@@ -61,63 +35,52 @@ internal class HrmHandler(IHrmProClient httpClient,
             phoneNumbers.AddRange(storedPhoneNumbersForWorkers);
         }
 
+        List<PositionWithPhoneNumber> positionWithPhoneNumbers = [];
 
-        foreach (var (index, positionId) in bag)
+        foreach (var position in positions)
         {
             var userPhoneNumbers =
-                phoneNumbers.Where(x => x.ActiveAssignedPositionId == positionId);
-
-            if (userPhoneNumbers.Any())
-            {
-                JsonNode? position = positions[index];
-
-                JsonArray phoneNumbersJsonArray = [];
-
-                foreach (var phoneNumber in userPhoneNumbers)
+                phoneNumbers.Where(x => x.ActiveAssignedPositionId == position.Id)
+                .Select(x => new PhoneNumberItem()
                 {
-                    JsonObject phoneNumberJson = [];
-                    phoneNumberJson.Add("id", phoneNumber.Id);
-                    phoneNumberJson.Add("number", phoneNumber.Number);
+                    Id = x.Id,
+                    Number = x.Number
+                }).ToList();
 
-                    phoneNumbersJsonArray.Add(phoneNumberJson);
-                }
+            PositionWithPhoneNumber positionWithPhoneNumber = new()
+            {
+                Id = position.Id,
+                PhoneNumbers = userPhoneNumbers,
+                Organization = position.Organization,
+                Department = position.Department,
+                PositionItem = position.PositionItem
+            };
 
-                position!.AsObject().Add("phoneNumbers", phoneNumbersJsonArray);
-
-                positions[index] = position.DeepClone();
-            }
+            positionWithPhoneNumbers.Add(positionWithPhoneNumber);
         }
 
-        var updatedData = new JsonObject
+        return new ResponseWrapper<ListResponse<PositionWithPhoneNumber>>()
         {
-            ["data"] = positions
+            Message = positionsResponse.Message,
+            Error = positionsResponse.Error,
+            Data = new ListResponse<PositionWithPhoneNumber>()
+            {
+                Page = positionsResponse.Data.Page,
+                Total = positionsResponse.Data.Total,
+                Data = positionWithPhoneNumbers
+            }
         };
-
-        // Replace the 'data' property in workersResponse
-        var workersResponseObject = (IDictionary<string, object>)positionsResponse;
-        workersResponseObject["data"] = updatedData;
-
-        return positionsResponse;
     }
 
-    public async Task<ExpandoObject> GetWorkersWithPhoneNumbers(string queryParams, CancellationToken cancellationToken = default)
+    public async Task<ResponseWrapper<ListResponse<WorkerWithPhoneNumber>>> GetWorkersWithPhoneNumbers(string queryParams, CancellationToken cancellationToken = default)
     {
         var login = await httpClient.Login(cancellationToken);
 
-        dynamic workersResponse = await httpClient.GetWorkers(login.TokenValue, queryParams, cancellationToken);
+        var workersResponse = await httpClient.GetWorkers(login.TokenValue, queryParams, cancellationToken);
 
-        List<(int index, int workerId)> bag = [];
+        var workers = workersResponse.Data.Data;
 
-        JsonElement workerData = workersResponse.data.GetProperty("data");
-
-        var workers = JsonArray.Create(workerData)!;
-
-        for (int i = 0; i < workers.Count; i++)
-        {
-            bag.Add((i, (int)workers[i]!["worker"]!["id"]!));
-        }
-
-        var workerIds = bag.Select(x => x.workerId).ToList();
+        var workerIds = workers.Select(x => x.Worker.Id).ToList();
 
         List<PhoneNumber> phoneNumbers = [];
 
@@ -131,42 +94,41 @@ internal class HrmHandler(IHrmProClient httpClient,
             phoneNumbers.AddRange(storedPhoneNumbersForWorkers);
         }
 
+        List<WorkerWithPhoneNumber> workerWithPhoneNumbers = [];
 
-        foreach (var (index, workerId) in bag)
+        foreach (var worker in workers)
         {
             var userPhoneNumbers =
-                phoneNumbers.Where(x => x.ActiveAssignedUser!.ExternalId == workerId);
-
-            if (userPhoneNumbers.Any())
-            {
-                JsonNode? worker = workers[index];
-
-                JsonArray phoneNumbersJsonArray = [];
-
-                foreach (var phoneNumber in userPhoneNumbers)
+                phoneNumbers.Where(x => x.ActiveAssignedUser!.ExternalId == worker.Worker.Id)
+                .Select(x => new PhoneNumberItem()
                 {
-                    JsonObject phoneNumberJson = [];
-                    phoneNumberJson.Add("id", phoneNumber.Id);
-                    phoneNumberJson.Add("number", phoneNumber.Number);
+                    Id = x.Id,
+                    Number = x.Number,
+                }).ToList();
+            
+            WorkerWithPhoneNumber workerWithPhoneNumber = new()
+            {
+                Id = worker.Id,
+                Organization = worker.Organization,
+                Department = worker.Department,
+                DepartmentPosition = worker.DepartmentPosition,
+                Worker = worker.Worker,
+                PhoneNumbers = userPhoneNumbers,
+            };
 
-                    phoneNumbersJsonArray.Add(phoneNumberJson);
-                }
-
-                worker.AsObject().Add("phoneNumbers", phoneNumbersJsonArray);
-
-                workers[index] = worker.DeepClone();
-            }
+            workerWithPhoneNumbers.Add(workerWithPhoneNumber);
         }
 
-        var updatedData = new JsonObject
+        return new ResponseWrapper<ListResponse<WorkerWithPhoneNumber>>()
         {
-            ["data"] = workers
+            Message = workersResponse.Message,
+            Error = workersResponse.Error,
+            Data = new ListResponse<WorkerWithPhoneNumber>()
+            {
+                Page = workersResponse.Data.Page,
+                Total = workersResponse.Data.Total,
+                Data = workerWithPhoneNumbers
+            }
         };
-
-        // Replace the 'data' property in workersResponse
-        var workersResponseObject = (IDictionary<string, object>)workersResponse;
-        workersResponseObject["data"] = updatedData;
-
-        return workersResponse;
     }
 }

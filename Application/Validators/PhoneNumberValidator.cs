@@ -53,7 +53,7 @@ internal class PhoneNumberValidator : BaseValidator<PhoneNumber, Guid>, IValidat
     {
         if (number is { Length: 5 } validLengthNumber)
         {
-            if (!validLengthNumber.All(char.IsNumber))
+            if (validLengthNumber.All(char.IsNumber))
             {
                 return new Success();
             }

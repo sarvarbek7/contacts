@@ -1,3 +1,4 @@
+using Contacts.Api.Extensions;
 using Contacts.Api.Mappings;
 using Contacts.Application.Handlers.Interfaces;
 using Contacts.Contracts.PhoneNumbers;
@@ -19,7 +20,7 @@ public static class CreatePhoneNumberEndpoint
                               HttpContext context,
                               IPhoneNumberHandler phoneNumberHandler)
     {
-        var message = request.MapTo(0);
+        var message = request.MapTo(context.GetUserId());
 
         var result = await phoneNumberHandler.HandleCreate(message, context.RequestAborted);
 

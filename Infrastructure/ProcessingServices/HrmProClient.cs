@@ -35,7 +35,7 @@ internal class HrmProClient : IHrmProClient
 
         this.client.BaseAddress = new Uri(httpConfiguration.BaseUrl);
     }
-    public async Task<ExpandoObject> GetDepartments(string token, string query, CancellationToken cancellationToken = default)
+    public async Task<ResponseWrapper<List<Department>>> GetDepartments(string token, string query, CancellationToken cancellationToken = default)
     {
         var endpoint = httpConfiguration.Endpoints.Single(x => x.Name == HttpEndpoint.HrmPro_Department);
 
@@ -60,7 +60,7 @@ internal class HrmProClient : IHrmProClient
         if (response.StatusCode == HttpStatusCode.OK)
         {
             var departments = await
-                response.Content.ReadFromJsonAsync<ExpandoObject>(cancellationToken);
+                response.Content.ReadFromJsonAsync<ResponseWrapper<List<Department>>>(cancellationToken);
 
             return departments ?? throw new NotImplementedException();
         }
@@ -68,7 +68,7 @@ internal class HrmProClient : IHrmProClient
         throw new NotImplementedException();
     }
 
-    public async Task<ExpandoObject> GetPositions(string token, string query, CancellationToken cancellationToken = default)
+    public async Task<ResponseWrapper<ListResponse<Position>>> GetPositions(string token, string query, CancellationToken cancellationToken = default)
     {
         var endpoint = httpConfiguration.Endpoints.Single(x => x.Name == HttpEndpoint.HrmPro_Positions);
 
@@ -93,7 +93,7 @@ internal class HrmProClient : IHrmProClient
         if (response.StatusCode == HttpStatusCode.OK)
         {
             var positions = await
-                response.Content.ReadFromJsonAsync<ExpandoObject>(cancellationToken);
+                response.Content.ReadFromJsonAsync<ResponseWrapper<ListResponse<Position>>>(cancellationToken);
 
             return positions ?? throw new NotImplementedException();
         }
@@ -101,11 +101,11 @@ internal class HrmProClient : IHrmProClient
         throw new NotImplementedException();
     }
 
-    public async Task<ExpandoObject> GetStructure(string token, CancellationToken cancellationToken = default)
+    public async Task<ResponseWrapper<List<Organization>>> GetStructure(string token, CancellationToken cancellationToken = default)
     {
         const string key = "hrm_pro_structure";
 
-        if (cache.TryGetValue(key, out ExpandoObject? cachedStructure))
+        if (cache.TryGetValue(key, out ResponseWrapper<List<Organization>>? cachedStructure))
         {
             return cachedStructure!;
         }
@@ -126,7 +126,7 @@ internal class HrmProClient : IHrmProClient
         if (response.StatusCode == HttpStatusCode.OK)
         {
             var structure = await
-                response.Content.ReadFromJsonAsync<ExpandoObject>(cancellationToken);
+                response.Content.ReadFromJsonAsync<ResponseWrapper<List<Organization>>>(cancellationToken);
 
             cache.Set(key, structure!, options: new MemoryCacheEntryOptions()
             {
@@ -139,7 +139,7 @@ internal class HrmProClient : IHrmProClient
         throw new NotImplementedException();
     }
 
-    public async Task<ExpandoObject> GetWorkers(string token, string query, CancellationToken cancellationToken = default)
+    public async Task<ResponseWrapper<ListResponse<WorkerResponse>>> GetWorkers(string token, string query, CancellationToken cancellationToken = default)
     {
         var endpoint = httpConfiguration.Endpoints.Single(x => x.Name == HttpEndpoint.HrmPro_Workers);
 
@@ -164,7 +164,7 @@ internal class HrmProClient : IHrmProClient
         if (response.StatusCode == HttpStatusCode.OK)
         {
             var workers = await
-                response.Content.ReadFromJsonAsync<ExpandoObject>(cancellationToken);
+                response.Content.ReadFromJsonAsync<ResponseWrapper<ListResponse<WorkerResponse>>>(cancellationToken);
 
             return workers ?? throw new NotImplementedException();
         }

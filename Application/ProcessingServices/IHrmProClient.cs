@@ -7,10 +7,10 @@ public interface IHrmProClient
 {
     public Task<LoginResponse> Login(CancellationToken cancellationToken = default);
 
-    public Task<ExpandoObject> GetStructure(string token,
+    public Task<ResponseWrapper<List<Organization>>> GetStructure(string token,
                                          CancellationToken cancellationToken = default);
 
-    public Task<ExpandoObject> GetDepartments(string token,  string query, CancellationToken cancellationToken = default);
-    public Task<ExpandoObject> GetPositions(string token, string query, CancellationToken cancellationToken = default);
-    public Task<ExpandoObject> GetWorkers(string token, string query, CancellationToken cancellationToken = default);
+    public Task<ResponseWrapper<List<Department>>> GetDepartments(string token,  string query, CancellationToken cancellationToken = default);
+    public Task<ResponseWrapper<ListResponse<Position>>> GetPositions(string token, string query, CancellationToken cancellationToken = default);
+    public Task<ResponseWrapper<ListResponse<WorkerResponse>>> GetWorkers(string token, string query, CancellationToken cancellationToken = default);
 }

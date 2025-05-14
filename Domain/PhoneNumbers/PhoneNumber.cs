@@ -11,6 +11,7 @@ public class PhoneNumber : IEntity<Guid>,
 {
     public Guid Id { get; init; }
     public required string Number { get; set; }
+    public int? ActiveAssignedOrganizationId {get; set; }
     public int? ActiveAssignedUserId { get; set; }
     public User? ActiveAssignedUser { get; set; }
     public int? ActiveAssignedPositionId { get; set; }
@@ -27,9 +28,10 @@ public class PhoneNumber : IEntity<Guid>,
     public int? DeletedById { get; set; }
     public bool IsDeleted { get; set; }
 
-    public void AssignUser(User user, int accountId)
+    public void AssignUser(User user, int organizationId, int accountId)
     {
         ActiveAssignedUser = user;
+        ActiveAssignedOrganizationId = organizationId;
 
         foreach (var history in UsersHistory.Where(x => x.IsActive))
         {
@@ -50,6 +52,7 @@ public class PhoneNumber : IEntity<Guid>,
     public void UnAssignUser(int accountId)
     {
         ActiveAssignedUserId = null;
+        ActiveAssignedOrganizationId = null;
 
         foreach (var history in UsersHistory.Where(x => x.IsActive))
         {
@@ -60,16 +63,24 @@ public class PhoneNumber : IEntity<Guid>,
     }
 
     public void AssignPosition(int positionId,
+                               int organizationId,
+                               string organization,
+                               string department,
+                               string position,
                                int accountId)
     {
         ActiveAssignedPositionId = positionId;
+        ActiveAssignedOrganizationId = organizationId;
 
         var positionPhoneHistory = new PositionPhoneNumber()
         {
             PositionId = positionId,
             IsActive = true,
             CreatedById = accountId,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            Organization = organization,
+            Department = department,
+            Position = position,
         };
 
         PositionHistory.Add(positionPhoneHistory);

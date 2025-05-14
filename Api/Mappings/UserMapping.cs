@@ -29,16 +29,16 @@ public static class UserMapping
             Photo = x.Photo,
         };
     
-    public static Expression<Func<Domain.Users.User, User>> UserDomainToContract =>
-        x => new User()
-        {
-            Id = x.Id,
-            ExternalId = x.ExternalId,
-            FirstName = x.FirstName,
-            LastName = x.LastName,
-            MiddleName = x.MiddleName,
-            Photo = x.Photo,
-            History = x.PhoneNumberHistory.Select(PhoneNumberMapping.UserPhoneNumberToPhoneNumberHistoryItem.Invoke).ToList(),
-            ActivePhoneNumbers = x.ActivePhoneNumbers.Select(PhoneNumberMapping.PhoneNumberToListItem.Invoke).ToList()
-        };
+    // public static Expression<Func<Domain.Users.User, User>> UserDomainToContract =>
+    //     x => new User()
+    //     {
+    //         Id = x.Id,
+    //         ExternalId = x.ExternalId,
+    //         FirstName = x.FirstName,
+    //         LastName = x.LastName,
+    //         MiddleName = x.MiddleName,
+    //         Photo = x.Photo,
+    //         History = x.PhoneNumberHistory.Select(PhoneNumberMapping.UserPhoneNumberToPhoneNumberHistoryItem.Invoke).ToList(),
+    //         ActivePhoneNumbers = x.ActivePhoneNumbers.Select(PhoneNumberMapping.PhoneNumberToListItem.Invoke).ToList()
+    //     };
 }

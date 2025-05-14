@@ -1,5 +1,6 @@
 using System.Dynamic;
 using Contacts.Application.ProcessingServices;
+using Contacts.Application.ProcessingServices.Models.Responses.HrmPro;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,7 +13,7 @@ public static class StructureEndpoint
         return route.MapGet(Routes.Structure, Handler);
     }
 
-    static async Task<Ok<ExpandoObject>> Handler([FromServices] IHrmProClient httpClient,
+    static async Task<Ok<ResponseWrapper<List<Organization>>>> Handler([FromServices] IHrmProClient httpClient,
                                                  HttpContext context)
     {
         var ct = context.RequestAborted;

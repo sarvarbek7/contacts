@@ -1,5 +1,6 @@
 using Application.Common;
 using Contacts.Application.Handlers.Messages.PhoneNumbers;
+using Contacts.Application.Handlers.Responses;
 using Contacts.Domain.PhoneNumbers;
 using ErrorOr;
 
@@ -15,5 +16,5 @@ public interface IPhoneNumberHandler
     Task<ErrorOr<Updated>> HandleUpdate(UpdatePhoneNumberMessage message, CancellationToken cancellationToken = default);
     Task<ErrorOr<Deleted>> HandleDelete(DeletePhoneNumberMessage message, CancellationToken cancellationToken = default);
     Task<ErrorOr<PhoneNumber>> HandleGetById(GetPhoneNumberByIdMessage message, CancellationToken cancellationToken = default);
-    Task<ListResult<PhoneNumber>> HandleList(ListPhoneNumbersMessage message, CancellationToken cancellationToken = default);
+    Task<ListResult<PhoneNumberListItemWithPosition>> HandleList(ListPhoneNumbersMessage message, CancellationToken cancellationToken = default);
 }

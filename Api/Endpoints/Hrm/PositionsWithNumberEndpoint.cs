@@ -1,6 +1,8 @@
 using System.Dynamic;
 using Contacts.Application.Handlers.Interfaces;
+using Contacts.Application.Handlers.Responses;
 using Contacts.Application.ProcessingServices;
+using Contacts.Application.ProcessingServices.Models.Responses.HrmPro;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,7 +15,7 @@ public static class PositionsWithNumberEndpoint
         return route.MapGet(Routes.PositionsWithNumber, Handler);
     }
 
-    static async Task<Ok<ExpandoObject>> Handler([FromServices] IHrmHandler handler,
+    static async Task<Ok<ResponseWrapper<ListResponse<PositionWithPhoneNumber>>>> Handler([FromServices] IHrmHandler handler,
                                                  HttpContext httpContext)
     {
         var positions = await handler.GetPositionsWithPhoneNumbers(httpContext.Request.QueryString.Value

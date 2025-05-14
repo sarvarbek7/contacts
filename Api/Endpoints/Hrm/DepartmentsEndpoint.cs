@@ -1,5 +1,6 @@
 using System.Dynamic;
 using Contacts.Application.ProcessingServices;
+using Contacts.Application.ProcessingServices.Models.Responses.HrmPro;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,7 +13,7 @@ public static class DepartmentsEndpoint
         return route.MapGet(Routes.Departments, Handler);
     }
 
-    static async Task<Ok<ExpandoObject>> Handler([FromServices] IHrmProClient httpClient,
+    static async Task<Ok<ResponseWrapper<List<Department>>>> Handler([FromServices] IHrmProClient httpClient,
                                                  HttpContext httpContext)
     {
         var cancellationToken = httpContext.RequestAborted;

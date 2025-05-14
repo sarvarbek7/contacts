@@ -42,7 +42,7 @@ public static class PhoneNumberMapping
                                                  Guid id,
                                                  int accountId)
     {
-        return new(request.User.MapTo(), id, accountId);
+        return new(request.User.MapTo(), id, request.OrganizationId, accountId);
     }
 
     public static AssignPositionPhoneNumberMessage MapTo(this AssignPositionPhoneNumberRequest request,
@@ -51,14 +51,18 @@ public static class PhoneNumberMapping
     {
         return new(request.PositionId,
                    id,
+                   request.OrganizationId,
+                   request.Organization,
+                   request.Department,
+                   request.Position,
                    accountId);
     }
 
-    public static Expression<Func<Domain.PhoneNumbers.PhoneNumber, PhoneNumberListItem>> PhoneNumberToListItem =>
-        x => new PhoneNumberListItem(x.Id,
-                                     x.Number,
-                                     x.ActiveAssignedUser == null ? null : UserMapping.UserDomainToListItem.Invoke(x.ActiveAssignedUser),
-                                     x.ActiveAssignedPositionId);
+    // public static Expression<Func<Domain.PhoneNumbers.PhoneNumber, PhoneNumberListItem>> PhoneNumberToListItem =>
+    //     x => new PhoneNumberListItem(x.Id,
+    //                                  x.Number,
+    //                                  x.ActiveAssignedUser == null ? null : UserMapping.UserDomainToListItem.Invoke(x.ActiveAssignedUser),
+    //                                  x.ActiveAssignedPositionId);
 
     public static Expression<Func<Domain.PhoneNumbers.PhoneNumber, Contracts.PhoneNumbers.PhoneNumber>> PhoneNumberDomainToContract =>
         x => new Contracts.PhoneNumbers.PhoneNumber()
@@ -70,17 +74,17 @@ public static class PhoneNumberMapping
             PositionHistory = x.PositionHistory.Select(p => UserPositionPhoneNumberToHistoryItem.Invoke(p)).ToList()
         };
 
-    public static Expression<Func<UserPhoneNumber, PhoneNumberHistoryItem>> UserPhoneNumberToPhoneNumberHistoryItem =>
-        x => new PhoneNumberHistoryItem()
-        {
-            Id = x.Id,
-            PhoneNumber = x.PhoneNumber == null ? null : PhoneNumberToListItem.Invoke(x.PhoneNumber),
-            IsActive = x.IsActive,
-            CreatedAt = x.CreatedAt,
-            RemovedAt = x.RemovedAt
-        };
+    // public static Expression<Func<UserPhoneNumber, PhoneNumberHistoryItem>> UserPhoneNumberToPhoneNumberHistoryItem =>
+    //     x => new PhoneNumberHistoryItem()
+    //     {
+    //         Id = x.Id,
+    //         PhoneNumber = x.PhoneNumber == null ? null : PhoneNumberToListItem.Invoke(x.PhoneNumber),
+    //         IsActive = x.IsActive,
+    //         CreatedAt = x.CreatedAt,
+    //         RemovedAt = x.RemovedAt
+    //     };
 
-    public static Expression<Func<Domain.PhoneNumbers.UserPhoneNumber, UserHistoryItem>> UserPhoneNumberToUserHistoryItem
+    public static Expression<Func<UserPhoneNumber, UserHistoryItem>> UserPhoneNumberToUserHistoryItem
      =>
         x => new UserHistoryItem()
         {

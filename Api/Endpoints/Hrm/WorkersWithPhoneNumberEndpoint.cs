@@ -1,6 +1,7 @@
 using System.Dynamic;
 using Contacts.Application.Handlers.Interfaces;
-using Contacts.Application.ProcessingServices;
+using Contacts.Application.Handlers.Responses;
+using Contacts.Application.ProcessingServices.Models.Responses.HrmPro;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,7 +14,7 @@ public static class WorkersWithPhoneNumberEndpoint
         return route.MapGet(Routes.WorkersWithNumber, Handler);
     }
 
-    static async Task<Ok<ExpandoObject>> Handler([FromServices] IHrmHandler handler,
+    static async Task<Ok<ResponseWrapper<ListResponse<WorkerWithPhoneNumber>>>> Handler([FromServices] IHrmHandler handler,
                                                  HttpContext httpContext)
     {
         var cancellationToken = httpContext.RequestAborted;

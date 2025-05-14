@@ -59,7 +59,7 @@ internal class AccountHandler(IBaseService<Account, int> accountService,
 
         query = query.Paged(message.Pagination);
 
-        return new ListResult<Account>(query, message.Pagination, total);
+        return ListResult<Account>.FromQueryable(query, message.Pagination, total);
 
     }
 }
