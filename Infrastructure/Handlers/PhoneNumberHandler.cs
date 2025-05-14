@@ -1,5 +1,6 @@
 using Application.Common;
 using Application.Errors;
+using Application.ProcessingServices;
 using Application.Services.Foundations;
 using Contacts.Application.Handlers.Interfaces;
 using Contacts.Application.Handlers.Messages.PhoneNumbers;
@@ -16,7 +17,8 @@ namespace Contacts.Infrastructure.Handlers;
 
 class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
                          IUserHandler userHandler,
-                         IHrmProClient hrmClient) : IPhoneNumberHandler
+                         IHrmProClient hrmClient,
+                         ITranslationService translationService) : IPhoneNumberHandler
 {
     public async Task<ErrorOr<Success>> HandleUserAssignPhoneNumber(AssignUserPhoneNumberMessage message, CancellationToken cancellationToken = default)
     {
@@ -152,11 +154,15 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
                 if (temp.Length >= 3)
                 {
+                    var translationResult = translationService.Translate(temp);
+
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
 #pragma warning disable CS8604 // Possible null reference argument.
-                    predicate.Or(x => EF.Functions.ILike(x.ActiveAssignedUser.LastName, $"%{temp}%"))
-                             .Or(x => EF.Functions.ILike(x.ActiveAssignedUser.FirstName, $"%{temp}%"))
-                             .Or(x => EF.Functions.ILike(x.ActiveAssignedUser.MiddleName, $"%{temp}%"));
+                    predicate.Or(x => EF.Functions.ILike(x.ActiveAssignedUser.LastName, $"%{translationResult.Latin}%"));
+                    
+                    predicate.Or(x => EF.Functions.ILike(x.ActiveAssignedUser.FirstName, $"%{translationResult.Latin}%"));
+
+                    predicate.Or(x => EF.Functions.ILike(x.ActiveAssignedUser.MiddleName, $"%{translationResult.Latin}%"));
 #pragma warning restore CS8604 // Possible null reference argument.
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
                 }

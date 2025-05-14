@@ -7,6 +7,7 @@ using Contacts.Infrastructure.ProcessingServices;
 using Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql.Replication.PgOutput.Messages;
 
 namespace Contacts.Infrastructure;
 
@@ -20,6 +21,8 @@ public static class DependencyInjection
 
         services.AddRepositories(currentAssembly);
         services.AddFoundationServices(currentAssembly);
+
+        services.AddTranslationServices();
 
         AddHttpClients(services);
         AddHandlers(services);
@@ -36,7 +39,12 @@ public static class DependencyInjection
 
     private static void AddHttpClients(IServiceCollection services)
     {
-        services.ConfigureHttpClientDefaults(builder => builder.AddStandardResilienceHandler());
+        services.ConfigureHttpClientDefaults(builder => builder.AddStandardResilienceHandler(options =>
+        {
+            options.AttemptTimeout.Timeout = TimeSpan.FromMinutes(1);
+            options.CircuitBreaker.SamplingDuration = TimeSpan.FromMinutes(2);
+            options.TotalRequestTimeout.Timeout = TimeSpan.FromMinutes(3);
+        }));
         
         services.AddHttpClient<IHrmClient, HrmClient>("hrm-http-client");
 

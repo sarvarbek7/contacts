@@ -80,7 +80,7 @@ internal class HrmHandler(IHrmProClient httpClient,
 
         var workers = workersResponse.Data.Data;
 
-        var workerIds = workers.Select(x => x.Worker.Id).ToList();
+        var workerIds = workers.Select(x => x.Id).ToList();
 
         List<PhoneNumber> phoneNumbers = [];
 
@@ -99,7 +99,7 @@ internal class HrmHandler(IHrmProClient httpClient,
         foreach (var worker in workers)
         {
             var userPhoneNumbers =
-                phoneNumbers.Where(x => x.ActiveAssignedUser!.ExternalId == worker.Worker.Id)
+                phoneNumbers.Where(x => x.ActiveAssignedUser!.ExternalId == worker.Id)
                 .Select(x => new PhoneNumberItem()
                 {
                     Id = x.Id,

@@ -13,6 +13,9 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Serilog" Version="4.2.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,6 +23,7 @@
     <ProjectReference Include="../Contracts/Contacts.Contracts.csproj" />
     <ProjectReference Include="../Infrastructure/Contacts.Infrastructure.csproj" />
     <ProjectReference Include="../common/Mappings/Mappings.csproj" />
+    <ProjectReference Include="..\common\Api\Api.csproj" />
   </ItemGroup>
 
 </Project>

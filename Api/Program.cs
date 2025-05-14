@@ -8,8 +8,9 @@ using Contacts.Application.Common.Settings;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Contacts.Api.Endpoints.Auth;
-using Contacts.Api;
 using Contacts.Api.Endpoints.Accounts;
+using Serilog;
+using Api;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +55,15 @@ builder.Services.AddAuthentication().AddJwtBearer(options =>
 });
 
 builder.Services.AddAuthorization();
+
+var configuration = new LoggerConfiguration()
+              .MinimumLevel.Information()
+              .WriteTo.Console();
+Log.Logger = configuration.CreateLogger();
+
+builder.Services.AddSerilog(Log.Logger);
+
+
 
 var app = builder.Build();
 
