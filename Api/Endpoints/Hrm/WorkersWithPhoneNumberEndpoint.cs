@@ -1,4 +1,3 @@
-using System.Dynamic;
 using Contacts.Application.Handlers.Interfaces;
 using Contacts.Application.Handlers.Responses;
 using Contacts.Application.ProcessingServices.Models.Responses.HrmPro;

@@ -18,6 +18,7 @@ namespace Contacts.Infrastructure.Handlers;
 class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
                          IUserHandler userHandler,
                          IHrmProClient hrmClient,
+                         IHrmProcessingService hrmProcessingService,
                          ITranslationService translationService) : IPhoneNumberHandler
 {
     public async Task<ErrorOr<Success>> HandleUserAssignPhoneNumber(AssignUserPhoneNumberMessage message, CancellationToken cancellationToken = default)
@@ -328,7 +329,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
         message.Organization,
         message.Department,
         message.Position,
-                                   message.UserAccountIdWhoDoesAction);
+        message.UserAccountIdWhoDoesAction);
 
         await phoneNumberService.SaveChanges(cancellationToken);
 
@@ -351,5 +352,50 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
         await phoneNumberService.SaveChanges(cancellationToken);
 
         return new Success();
+    }
+
+    public async Task<List<WorkerWithPhoneNumber>> HandlePositionPhoneNumbers(ListPhoneNumbersForPositionMessage message,
+                                                                        CancellationToken cancellationToken = default)
+    {
+        var login = await hrmClient.Login(cancellationToken);
+
+        List<WorkerResponse> workers = [];
+        bool hasWorker = true;
+        int page = 1;
+        int perPage = 100;
+
+        string query = $"?organization_id={message.OrganizationId}&department_position_id={message.PositionId}&per_page={perPage}";
+
+        while (hasWorker)
+        {
+            string queryWithPage = query + $"&page={page}";
+
+            var response = await hrmClient.GetWorkers(login.TokenValue, queryWithPage, cancellationToken);
+
+            var listResponse = response.Data;
+
+            if (listResponse.Total > page * perPage)
+            {
+                page++;
+            }
+            else
+            {
+                hasWorker = false;
+            }
+
+            workers.AddRange(listResponse.Data);
+        }
+
+        var workerIds = workers.Select(x =>x.Id).ToList();
+
+        var workerIdsWhoHasPhoneNumber = await phoneNumberService.GetAll(x => workerIds.Contains(x.ActiveAssignedUser.ExternalId))
+            .Select(x=>x.ActiveAssignedUser.ExternalId).ToListAsync(cancellationToken);
+        
+        var workersWhoHasPhoneNumber = workers.Where(x => workerIdsWhoHasPhoneNumber.Contains(x.Id)).ToList();
+
+        var workersWithPhoneNumber = await hrmProcessingService.GetWorkersWithPhoneNumber(workersWhoHasPhoneNumber,
+            cancellationToken);
+
+        return workersWithPhoneNumber;
     }
 }

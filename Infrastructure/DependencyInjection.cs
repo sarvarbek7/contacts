@@ -33,6 +33,8 @@ public static class DependencyInjection
 
     private static void AddProccessingServices(IServiceCollection services)
     {
+        services.AddScoped<IHrmProcessingService, HrmProcessingService>();
+
         services.AddSingleton<IPasswordHashingService, PasswordHashingService>();
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
     }

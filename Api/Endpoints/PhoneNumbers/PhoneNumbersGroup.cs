@@ -15,6 +15,7 @@ public static class PhoneNumbersGroup
         group.MapRemovePhoneNumberFromUser();
         group.MapRemovePhoneNumberFromPosition();
         group.MapUpdatePhoneNumber();
+        group.MapListPhoneNumbersForPosition();
 
         return group;
     }

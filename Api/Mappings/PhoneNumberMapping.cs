@@ -104,4 +104,7 @@ public static class PhoneNumberMapping
             CreatedAt = x.CreatedAt,
             RemovedAt = x.RemovedAt,
         };
+
+    public static ListPhoneNumbersForPositionMessage MapTo(this ListPhoneNumbersForPositionQuery query)
+        => new (query.OrganizationId, query.PositionId);
 }
