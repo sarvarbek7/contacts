@@ -8,7 +8,6 @@ using Contacts.Domain.PhoneNumbers;
 namespace Contacts.Infrastructure.Handlers;
 
 internal class HrmHandler(IHrmProClient httpClient,
-                          IBaseService<PhoneNumber, Guid> phoneNumberService,
                           IHrmProcessingService hrmProcessingService) : IHrmHandler
 {
     public async Task<ResponseWrapper<ListResponse<PositionWithPhoneNumber>>> GetPositionsWithPhoneNumbers(string queryParams, CancellationToken cancellationToken = default)

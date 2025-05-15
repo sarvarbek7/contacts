@@ -388,9 +388,11 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
         var workerIds = workers.Select(x =>x.Id).ToList();
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         var workerIdsWhoHasPhoneNumber = await phoneNumberService.GetAll(x => workerIds.Contains(x.ActiveAssignedUser.ExternalId))
             .Select(x=>x.ActiveAssignedUser.ExternalId).ToListAsync(cancellationToken);
-        
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+
         var workersWhoHasPhoneNumber = workers.Where(x => workerIdsWhoHasPhoneNumber.Contains(x.Id)).ToList();
 
         var workersWithPhoneNumber = await hrmProcessingService.GetWorkersWithPhoneNumber(workersWhoHasPhoneNumber,

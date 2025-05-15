@@ -59,10 +59,12 @@ internal class HrmProcessingService(IBaseService<PhoneNumber, Guid> phoneNumberS
 
         if (workerIds.Count > 0)
         {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var storedPhoneNumbersForWorkers = await phoneNumberService.GetAll(x => workerIds.Contains(x.ActiveAssignedUser.ExternalId),
                                                                                tracked: false)
                 .Include(x => x.ActiveAssignedUser)
                 .ToListAsync(cancellationToken);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             phoneNumbers.AddRange(storedPhoneNumbersForWorkers);
         }
