@@ -6,9 +6,9 @@ namespace Contacts.Application.Handlers.Interfaces;
 
 public interface IHrmHandler
 {
-    Task<ResponseWrapper<ListResponse<WorkerWithPhoneNumber>>> GetWorkersWithPhoneNumbers(string queryParams, 
+    Task<ResponseWrapper<HrmListResponse<WorkerWithPhoneNumber>>> GetWorkersWithPhoneNumbers(string queryParams, 
         CancellationToken cancellationToken = default);
     
-    Task<ResponseWrapper<ListResponse<PositionWithPhoneNumber>>> GetPositionsWithPhoneNumbers(string queryParams, 
+    Task<ResponseWrapper<HrmListResponse<PositionWithPhoneNumber>>> GetPositionsWithPhoneNumbers(string queryParams, 
         CancellationToken cancellationToken = default);
 }

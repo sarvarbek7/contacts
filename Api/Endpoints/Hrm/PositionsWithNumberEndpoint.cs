@@ -15,7 +15,7 @@ public static class PositionsWithNumberEndpoint
         return route.MapGet(Routes.PositionsWithNumber, Handler);
     }
 
-    static async Task<Ok<ResponseWrapper<ListResponse<PositionWithPhoneNumber>>>> Handler([FromServices] IHrmHandler handler,
+    static async Task<Ok<ResponseWrapper<HrmListResponse<PositionWithPhoneNumber>>>> Handler([FromServices] IHrmHandler handler,
                                                  HttpContext httpContext)
     {
         var positions = await handler.GetPositionsWithPhoneNumbers(httpContext.Request.QueryString.Value

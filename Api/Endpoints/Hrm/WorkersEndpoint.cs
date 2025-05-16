@@ -13,7 +13,7 @@ public static class WorkersEndpoint
         return route.MapGet(Routes.Workers, Handler);
     }
 
-    static async Task<Ok<ResponseWrapper<ListResponse<WorkerResponse>>>> Handler([FromServices] IHrmProClient httpClient,
+    static async Task<Ok<ResponseWrapper<HrmListResponse<WorkerResponse>>>> Handler([FromServices] IHrmProClient httpClient,
                                                  HttpContext httpContext)
     {
         var cancellationToken = httpContext.RequestAborted;

@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Contacts.Application.ProcessingServices.Models.Responses.HrmPro;
 
-public record ListResponse<T>
+public record HrmListResponse<T>
 {
     [JsonPropertyName("current_page")]
     public int Page { get; init; }

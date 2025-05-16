@@ -17,5 +17,6 @@ public interface IPhoneNumberHandler
     Task<ErrorOr<Deleted>> HandleDelete(DeletePhoneNumberMessage message, CancellationToken cancellationToken = default);
     Task<ErrorOr<PhoneNumber>> HandleGetById(GetPhoneNumberByIdMessage message, CancellationToken cancellationToken = default);
     Task<ListResult<PhoneNumberListItemWithPosition>> HandleList(ListPhoneNumbersMessage message, CancellationToken cancellationToken = default);
+    Task<ListResult<PhoneNumberListItem>> HandleSearchByUser(SearchPhoneNumbersByUserMessage message, CancellationToken cancellationToken = default);
     Task<List<WorkerWithPhoneNumber>> HandlePositionPhoneNumbers(ListPhoneNumbersForPositionMessage message, CancellationToken cancellationToken = default);
 }

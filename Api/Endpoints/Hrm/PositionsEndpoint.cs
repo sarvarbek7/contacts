@@ -13,7 +13,7 @@ public static class PositionsEndpoint
         return route.MapGet(Routes.Positions, Handler);
     }
 
-    static async Task<Ok<ResponseWrapper<ListResponse<Position>>>> Handler([FromServices] IHrmProClient httpClient,
+    static async Task<Ok<ResponseWrapper<HrmListResponse<Position>>>> Handler([FromServices] IHrmProClient httpClient,
                                                  HttpContext httpContext)
     {
         var cancellationToken = httpContext.RequestAborted;

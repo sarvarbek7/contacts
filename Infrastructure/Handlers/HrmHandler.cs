@@ -10,7 +10,7 @@ namespace Contacts.Infrastructure.Handlers;
 internal class HrmHandler(IHrmProClient httpClient,
                           IHrmProcessingService hrmProcessingService) : IHrmHandler
 {
-    public async Task<ResponseWrapper<ListResponse<PositionWithPhoneNumber>>> GetPositionsWithPhoneNumbers(string queryParams, CancellationToken cancellationToken = default)
+    public async Task<ResponseWrapper<HrmListResponse<PositionWithPhoneNumber>>> GetPositionsWithPhoneNumbers(string queryParams, CancellationToken cancellationToken = default)
     {
         var login = await httpClient.Login(cancellationToken);
 
@@ -20,11 +20,11 @@ internal class HrmHandler(IHrmProClient httpClient,
 
         var positionWithPhoneNumbers = await hrmProcessingService.GetPositionWithPhoneNumbers(positions, cancellationToken);
 
-        return new ResponseWrapper<ListResponse<PositionWithPhoneNumber>>()
+        return new ResponseWrapper<HrmListResponse<PositionWithPhoneNumber>>()
         {
             Message = positionsResponse.Message,
             Error = positionsResponse.Error,
-            Data = new ListResponse<PositionWithPhoneNumber>()
+            Data = new HrmListResponse<PositionWithPhoneNumber>()
             {
                 Page = positionsResponse.Data.Page,
                 Total = positionsResponse.Data.Total,
@@ -33,7 +33,7 @@ internal class HrmHandler(IHrmProClient httpClient,
         };
     }
 
-    public async Task<ResponseWrapper<ListResponse<WorkerWithPhoneNumber>>> GetWorkersWithPhoneNumbers(string queryParams, CancellationToken cancellationToken = default)
+    public async Task<ResponseWrapper<HrmListResponse<WorkerWithPhoneNumber>>> GetWorkersWithPhoneNumbers(string queryParams, CancellationToken cancellationToken = default)
     {
         var login = await httpClient.Login(cancellationToken);
 
@@ -44,11 +44,11 @@ internal class HrmHandler(IHrmProClient httpClient,
         var workerWithPhoneNumbers = await hrmProcessingService.GetWorkersWithPhoneNumber(workers,
                                                                                           cancellationToken);
 
-        return new ResponseWrapper<ListResponse<WorkerWithPhoneNumber>>()
+        return new ResponseWrapper<HrmListResponse<WorkerWithPhoneNumber>>()
         {
             Message = workersResponse.Message,
             Error = workersResponse.Error,
-            Data = new ListResponse<WorkerWithPhoneNumber>()
+            Data = new HrmListResponse<WorkerWithPhoneNumber>()
             {
                 Page = workersResponse.Data.Page,
                 Total = workersResponse.Data.Total,

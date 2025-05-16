@@ -1,4 +1,5 @@
 using Application.Common;
+using Application.Common.Extensions;
 using Application.Services.Foundations;
 using Contacts.Application.Handlers.Interfaces;
 using Contacts.Application.Handlers.Messages.Accounts;
@@ -59,7 +60,7 @@ internal class AccountHandler(IBaseService<Account, int> accountService,
 
         query = query.Paged(message.Pagination);
 
-        return ListResult<Account>.FromQueryable(query, message.Pagination, total);
+        return message.ToListResultWithQuery(query, total);
 
     }
 }

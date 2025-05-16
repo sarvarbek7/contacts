@@ -20,6 +20,11 @@ public static class PhoneNumberMapping
         return new UpdatePhoneNumberMessage(id, request.Number, accountId);
     }
 
+    public static SearchPhoneNumbersByUserMessage MapTo(this ListPhoneNumbersByUserQuery query)
+    {
+        return new(query.ToPagination(), query.User);
+    }
+
     public static ListPhoneNumbersMessage MapTo(this ListPhoneNumbersQuery query)
     {
         List<int> positions = [];
@@ -63,6 +68,14 @@ public static class PhoneNumberMapping
     //                                  x.Number,
     //                                  x.ActiveAssignedUser == null ? null : UserMapping.UserDomainToListItem.Invoke(x.ActiveAssignedUser),
     //                                  x.ActiveAssignedPositionId);
+
+    public static Func<Application.Handlers.Responses.PhoneNumberListItem, PhoneNumberListItemSearchUser> PhoneNumberListItemToContractItemFunc =>
+         x => new PhoneNumberListItemSearchUser
+         {
+             Id = x.Id,
+             Number = x.Number,
+             AssignedUser = UserMapping.UserDomainToListItem!.Invoke(x.AssignedUser),
+         };
 
     public static Expression<Func<Domain.PhoneNumbers.PhoneNumber, Contracts.PhoneNumbers.PhoneNumber>> PhoneNumberDomainToContract =>
         x => new Contracts.PhoneNumbers.PhoneNumber()

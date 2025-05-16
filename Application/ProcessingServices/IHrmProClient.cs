@@ -11,6 +11,6 @@ public interface IHrmProClient
                                          CancellationToken cancellationToken = default);
 
     public Task<ResponseWrapper<List<Department>>> GetDepartments(string token,  string query, CancellationToken cancellationToken = default);
-    public Task<ResponseWrapper<ListResponse<Position>>> GetPositions(string token, string query, CancellationToken cancellationToken = default);
-    public Task<ResponseWrapper<ListResponse<WorkerResponse>>> GetWorkers(string token, string query, CancellationToken cancellationToken = default);
+    public Task<ResponseWrapper<HrmListResponse<Position>>> GetPositions(string token, string query, CancellationToken cancellationToken = default);
+    public Task<ResponseWrapper<HrmListResponse<WorkerResponse>>> GetWorkers(string token, string query, CancellationToken cancellationToken = default);
 }

@@ -12,6 +12,8 @@ using Contacts.Shared;
 using ErrorOr;
 using LinqKit;
 using Microsoft.EntityFrameworkCore;
+using Contacts.Infrastructure.Extensions;
+using Application.Common.Extensions;
 
 namespace Contacts.Infrastructure.Handlers;
 
@@ -147,32 +149,11 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
             var names = user.Split(' ', StringSplitOptions.RemoveEmptyEntries |
                                         StringSplitOptions.TrimEntries);
 
-            var predicate = PredicateBuilder.New<PhoneNumber>();
-
-            foreach (var name in names)
-            {
-                var temp = name;
-
-                if (temp.Length >= 3)
-                {
-                    var translationResult = translationService.Translate(temp);
-
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-#pragma warning disable CS8604 // Possible null reference argument.
-                    predicate.Or(x => EF.Functions.ILike(x.ActiveAssignedUser.LastName, $"%{translationResult.Latin}%"));
-                    
-                    predicate.Or(x => EF.Functions.ILike(x.ActiveAssignedUser.FirstName, $"%{translationResult.Latin}%"));
-
-                    predicate.Or(x => EF.Functions.ILike(x.ActiveAssignedUser.MiddleName, $"%{translationResult.Latin}%"));
-#pragma warning restore CS8604 // Possible null reference argument.
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-                }
-            }
+            var predicate = message.BuildPredicate(translationService);
 
             if (predicate.IsStarted)
             {
                 query = query.Where(predicate);
-
             }
         }
 
@@ -190,15 +171,6 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
                               .Select(x => x.PositionId)
                               .ToList();
 
-        if (workerIds.Count == 0)
-        {
-            workerIds.Add(-999_999);
-        }
-
-        if (positionIds.Count == 0)
-        {
-            positionIds.Add(-999_999);
-        }
 
         string workersQuery = $"?per_page={workerIds.Count}&ids={string.Join(',', workerIds)}";
         string positionsQuery = $"?per_page={positionIds.Count}&ids={string.Join(',', positionIds)}";
@@ -209,7 +181,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
         bool hasPosition = true;
         int positionPage = 1;
 
-        while (hasPosition)
+        while (hasPosition && positionIds.Count > 0)
         {
             string queryWithPage = positionsQuery + $"&page={positionPage}";
 
@@ -233,7 +205,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
         bool hasWorker = true;
         int workerPage = 1;
 
-        while (hasWorker)
+        while (hasWorker && workerIds.Count > 0)
         {
             string queryWithPage = workersQuery + $"&page={workerPage}";
 
@@ -270,8 +242,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
             phoneNumberListItemWithPositions.Add(phoneNumberWithPosition);
         }
 
-
-        return ListResult<PhoneNumberListItemWithPosition>.FromCollection(phoneNumberListItemWithPositions, message.Pagination, total);
+        return message.ToListResultWithData(phoneNumberListItemWithPositions, total);
     }
 
     public async Task<ErrorOr<Success>> HandleRemovePhoneNumber(RemoveUserPhoneNumberMessage message, CancellationToken cancellationToken = default)
@@ -399,5 +370,29 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
             cancellationToken);
 
         return workersWithPhoneNumber;
+    }
+
+    public async Task<ListResult<PhoneNumberListItem>> HandleSearchByUser(SearchPhoneNumbersByUserMessage message, CancellationToken cancellationToken = default)
+    {
+        IQueryable<PhoneNumber> query = phoneNumberService.GetAll(x => x.ActiveAssignedUserId != null,
+                                                                  tracked: false)
+                                      ;
+
+        var predicate = message.BuildPredicate(translationService);
+
+        if (predicate.IsStarted)
+        {
+            query = query.Where(predicate);
+        }
+
+        int total = await query.CountAsync(cancellationToken);
+
+        query = query.Paged(message.Pagination);
+
+        var data = await query.AsExpandable().Select(PhoneNumberListItem.To).ToListAsync(cancellationToken);
+
+
+        return message.ToListResultWithData(data,
+                                                             total);
     }
 }
