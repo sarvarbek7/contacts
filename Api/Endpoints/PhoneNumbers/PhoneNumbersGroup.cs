@@ -17,6 +17,9 @@ public static class PhoneNumbersGroup
         group.MapUpdatePhoneNumber();
         group.MapListPhoneNumbersForPosition();
         group.MapSearchPhoneNumbersByUser();
+        group.MapAssignPositionUserPhoneNumber();
+        group.MapSelectPhoneNumbers();
+        group.MapListPhoneNumbersForPositionClient();
 
         return group;
     }

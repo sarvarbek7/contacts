@@ -14,13 +14,14 @@ public static class DepartmentsEndpoint
     }
 
     static async Task<Ok<ResponseWrapper<List<Department>>>> Handler([FromServices] IHrmProClient httpClient,
+    [FromQuery] int organizations,
                                                  HttpContext httpContext)
     {
         var cancellationToken = httpContext.RequestAborted;
 
         var login = await httpClient.Login(cancellationToken);
 
-        var departments = await httpClient.GetDepartments(login.TokenValue, httpContext.Request.QueryString.Value ?? "", cancellationToken);
+        var departments = await httpClient.GetDepartments(login.TokenValue, organizations, cancellationToken);
 
         return TypedResults.Ok(departments);
     }

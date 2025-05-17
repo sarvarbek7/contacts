@@ -393,6 +393,86 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
 
         return message.ToListResultWithData(data,
-                                                             total);
+                                            total);
+    }
+
+    public async Task<ErrorOr<Success>> HandlePositionUserAssignPhoneNumber(AssignPositionUserPhoneNumberMessage message, CancellationToken cancellationToken = default)
+    {
+        var errorOrUser = await userHandler.HandleAddOrGetUser(message.User, cancellationToken);
+
+        if (errorOrUser.IsError)
+        {
+            return errorOrUser.FirstError;
+        }
+
+        var user = errorOrUser.Value;
+
+        var phoneNumber = await phoneNumberService.GetAll(x => x.Id == message.PhoneNumberId, tracked: true)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (phoneNumber is null)
+        {
+            return ApplicationErrors.EntityNotFoundForGivenId<PhoneNumber, Guid>(message.PhoneNumberId);
+        }
+
+        if (phoneNumber.ActiveAssignedPositionId != message.PositionId)
+        {
+            // TODO: implement phone number not assigned to user
+            throw new NotImplementedException();
+        }
+
+        phoneNumber.AssignPositionUser(user, message.UserAccountIdWhoDoesAction);
+
+        await phoneNumberService.SaveChanges(cancellationToken);
+
+        return new Success();
+    }
+
+    public async Task<List<WorkerWithPhoneNumber>> HandlePositionPhoneNumbersClient(ListPhoneNumbersForPositionMessageClient message, CancellationToken cancellationToken = default)
+    {
+        var login = await hrmClient.Login(cancellationToken);
+
+        List<WorkerResponse> workers = [];
+        bool hasWorker = true;
+        int page = 1;
+        int perPage = 100;
+
+        string query = $"?organization_id={message.OrganizationId}&department_position_id={message.PositionId}&per_page={perPage}";
+
+        while (hasWorker)
+        {
+            string queryWithPage = query + $"&page={page}";
+
+            var response = await hrmClient.GetWorkers(login.TokenValue, queryWithPage, cancellationToken);
+
+            var listResponse = response.Data;
+
+            if (listResponse.Total > page * perPage)
+            {
+                page++;
+            }
+            else
+            {
+                hasWorker = false;
+            }
+
+            workers.AddRange(listResponse.Data);
+        }
+
+        var workerIds = workers.Select(x =>x.Id).ToList();
+
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+        var workerIdsWhoHasPhoneNumber = await phoneNumberService.GetAll(x => x.ActiveAssignedPositionUserId != null &&
+                                                                         workerIds.Contains(x.ActiveAssignedPositionUser.ExternalId))
+            .Select(x=>x.ActiveAssignedPositionUser.ExternalId).ToListAsync(cancellationToken);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+
+        var workersWhoHasPhoneNumber = workers.Where(x => workerIdsWhoHasPhoneNumber.Contains(x.Id)).ToList();
+
+        var workersWithPhoneNumber = await hrmProcessingService.GetWorkersWithPhoneNumberInPosition(workersWhoHasPhoneNumber,
+            message.PositionId,
+             cancellationToken);
+
+        return workersWithPhoneNumber;
     }
 }

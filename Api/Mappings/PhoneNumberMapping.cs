@@ -15,6 +15,16 @@ public static class PhoneNumberMapping
         return new CreatePhoneNumberMessage(request.Number, accountId);
     }
 
+    public static AssignPositionUserPhoneNumberMessage MapTo(this AssignPhoneNumberToPositionUserRequest request,
+                                                             Guid phoneNumberId,
+                                                             int accountId)
+    {
+        return new AssignPositionUserPhoneNumberMessage(request.User.MapTo(),
+                                                        request.PositionId,
+                                                        phoneNumberId,
+                                                        accountId);
+    }
+
     public static UpdatePhoneNumberMessage MapTo(this UpdatePhoneNumberRequest request, Guid id, int accountId)
     {
         return new UpdatePhoneNumberMessage(id, request.Number, accountId);
@@ -119,5 +129,8 @@ public static class PhoneNumberMapping
         };
 
     public static ListPhoneNumbersForPositionMessage MapTo(this ListPhoneNumbersForPositionQuery query)
+        => new(query.OrganizationId, query.PositionId);
+        
+     public static ListPhoneNumbersForPositionMessageClient MapToClientMessage(this ListPhoneNumbersForPositionQuery query)
         => new (query.OrganizationId, query.PositionId);
 }

@@ -6,6 +6,4 @@ public record AssignPositionPhoneNumberMessage(int PositionId,
                                                string Organization,
                                                string Department,
                                                string Position,
-                                               int UserAccountIdWhoDoesAction) : IAuditableMessage
-{
-}
+                                               int UserAccountIdWhoDoesAction) : IAuditableMessage;

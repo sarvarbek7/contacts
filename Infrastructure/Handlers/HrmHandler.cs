@@ -1,9 +1,7 @@
-using Application.Services.Foundations;
 using Contacts.Application.Handlers.Interfaces;
 using Contacts.Application.Handlers.Responses;
 using Contacts.Application.ProcessingServices;
 using Contacts.Application.ProcessingServices.Models.Responses.HrmPro;
-using Contacts.Domain.PhoneNumbers;
 
 namespace Contacts.Infrastructure.Handlers;
 

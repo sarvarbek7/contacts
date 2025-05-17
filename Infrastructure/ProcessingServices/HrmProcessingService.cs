@@ -96,4 +96,56 @@ internal class HrmProcessingService(IBaseService<PhoneNumber, Guid> phoneNumberS
 
         return workerWithPhoneNumbers;
     }
+
+    public async Task<List<WorkerWithPhoneNumber>> GetWorkersWithPhoneNumberInPosition(List<WorkerResponse> workers,
+                                                                                       int positionId,
+                                                                                       CancellationToken cancellationToken = default)
+    {
+        var workerIds = workers.Select(x => x.Id).ToList();
+
+        List<PhoneNumber> phoneNumbers = [];
+
+        if (workerIds.Count > 0)
+        {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+            var storedPhoneNumbersForWorkers = await phoneNumberService.GetAll(x => x.ActiveAssignedPositionId == positionId && x.ActiveAssignedPositionUserId != null &&
+                                                                               workerIds.Contains(x.ActiveAssignedPositionUser.ExternalId),
+                                                                               tracked: false)
+                                                    .Include(x => x.ActiveAssignedPositionUser)
+                .ToListAsync(cancellationToken);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+
+            phoneNumbers.AddRange(storedPhoneNumbersForWorkers);
+        }
+
+        List<WorkerWithPhoneNumber> workerWithPhoneNumbers = [];
+
+        foreach (var worker in workers)
+        {
+            var userPhoneNumbers =
+                phoneNumbers.Where(x => x.ActiveAssignedPositionUser!.ExternalId == worker.Id)
+                .Select(x => new PhoneNumberItem()
+                {
+                    Id = x.Id,
+                    Number = x.Number,
+                }).ToList();
+            
+            WorkerWithPhoneNumber workerWithPhoneNumber = new()
+            {
+                Id = worker.Id,
+                Organization = worker.Organization,
+                Department = worker.Department,
+                DepartmentPosition = worker.DepartmentPosition,
+                Worker = worker.Worker,
+                PhoneNumbers = userPhoneNumbers,
+            };
+
+            if (workerWithPhoneNumber.PhoneNumbers.Count > 0)
+            {
+                workerWithPhoneNumbers.Add(workerWithPhoneNumber);
+            }
+        }
+
+        return workerWithPhoneNumbers;
+    }
 }

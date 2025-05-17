@@ -8,6 +8,7 @@ namespace Contacts.Application.Handlers.Interfaces;
 
 public interface IPhoneNumberHandler
 {
+    Task<ErrorOr<Success>> HandlePositionUserAssignPhoneNumber(AssignPositionUserPhoneNumberMessage message, CancellationToken cancellationToken = default);
     Task<ErrorOr<Success>> HandleUserAssignPhoneNumber(AssignUserPhoneNumberMessage message, CancellationToken cancellationToken = default);
     Task<ErrorOr<Success>> HandlePositionAssignPhoneNumber(AssignPositionPhoneNumberMessage message, CancellationToken cancellationToken = default);
     Task<ErrorOr<Success>> HandleRemovePhoneNumber(RemoveUserPhoneNumberMessage message, CancellationToken cancellationToken = default);
@@ -19,4 +20,5 @@ public interface IPhoneNumberHandler
     Task<ListResult<PhoneNumberListItemWithPosition>> HandleList(ListPhoneNumbersMessage message, CancellationToken cancellationToken = default);
     Task<ListResult<PhoneNumberListItem>> HandleSearchByUser(SearchPhoneNumbersByUserMessage message, CancellationToken cancellationToken = default);
     Task<List<WorkerWithPhoneNumber>> HandlePositionPhoneNumbers(ListPhoneNumbersForPositionMessage message, CancellationToken cancellationToken = default);
+    Task<List<WorkerWithPhoneNumber>> HandlePositionPhoneNumbersClient(ListPhoneNumbersForPositionMessageClient message, CancellationToken cancellationToken = default);
 }

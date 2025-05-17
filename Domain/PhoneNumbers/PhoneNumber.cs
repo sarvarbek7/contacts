@@ -15,7 +15,10 @@ public class PhoneNumber : IEntity<Guid>,
     public int? ActiveAssignedUserId { get; set; }
     public User? ActiveAssignedUser { get; set; }
     public int? ActiveAssignedPositionId { get; set; }
+    public int? ActiveAssignedPositionUserId { get; set; }
+    public User? ActiveAssignedPositionUser { get; set; }
     public List<UserPhoneNumber> UsersHistory { get; set; } = [];
+    public List<PositionUserPhoneNumber> PositionUsersHistory { get; set; } = [];
     public List<PositionPhoneNumber> PositionHistory { get; set; } = [];
     public DateTime CreatedAt { get; set; }
     public Account? CreatedBy { get; set; }
@@ -61,6 +64,21 @@ public class PhoneNumber : IEntity<Guid>,
             history.RemovedById = accountId;
         }
     }
+
+    public void AssignPositionUser(User user, int accountId)
+    {
+        ActiveAssignedPositionUser = user;
+
+        var history = new PositionUserPhoneNumber()
+        {
+            UserId = user.Id,
+            CreatedById = accountId,
+            CreatedAt = DateTime.UtcNow,
+        };
+
+        PositionUsersHistory.Add(history);
+    }
+
 
     public void AssignPosition(int positionId,
                                int organizationId,

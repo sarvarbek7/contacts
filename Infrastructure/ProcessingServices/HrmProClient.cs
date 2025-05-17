@@ -1,14 +1,15 @@
-using System.Collections.Specialized;
-using System.Dynamic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using Contacts.Application.Common.Exceptions;
 using Contacts.Application.Common.Settings;
 using Contacts.Application.ProcessingServices;
+using Contacts.Application.ProcessingServices.Models.Requests.HrmPro;
 using Contacts.Application.ProcessingServices.Models.Responses.HrmPro;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Contacts.Infrastructure.ProcessingServices;
@@ -19,14 +20,17 @@ internal class HrmProClient : IHrmProClient
     private readonly HttpClient client;
     private readonly HttpConfiguration httpConfiguration;
     private readonly IConfiguration configuration;
+    private readonly ILogger<HrmProClient> logger;
 
     public HrmProClient(HttpClient client,
                         IMemoryCache cache,
                         IOptions<List<HttpConfiguration>> options,
+                        ILogger<HrmProClient> logger,
                         IConfiguration configuration)
     {
         this.cache = cache;
         this.configuration = configuration;
+        this.logger = logger;
 
         httpConfiguration = options.Value?.SingleOrDefault(x => x.Name == HttpConfiguration.HRM_PRO)
             ?? throw new MissingConfigurationException();
@@ -35,8 +39,31 @@ internal class HrmProClient : IHrmProClient
 
         this.client.BaseAddress = new Uri(httpConfiguration.BaseUrl);
     }
-    public async Task<ResponseWrapper<List<Department>>> GetDepartments(string token, string query, CancellationToken cancellationToken = default)
+    public async Task<ResponseWrapper<List<Department>>> GetDepartments(string token, int organizationId, CancellationToken cancellationToken = default)
     {
+        string key = $"hrm_pro_departments:{organizationId}";
+
+        var stopwatch = Stopwatch.StartNew();
+
+        if (cache.TryGetValue(key, out ResponseWrapper<List<Department>>? cachedResponse))
+        {
+            if (cachedResponse is not null)
+            {
+                stopwatch.Stop();
+
+                logger.LogInformation("Cache entry with key {key} served in {elapsedMilliseconds} ms", key, stopwatch.ElapsedMilliseconds);
+
+                return cachedResponse;
+            }
+        }
+
+        if (stopwatch.IsRunning)
+        {
+            stopwatch.Stop();
+        }
+
+        string query = $"?organizations={organizationId}";
+
         var endpoint = httpConfiguration.Endpoints.Single(x => x.Name == HttpEndpoint.HrmPro_Department);
 
         var path = endpoint.Path;
@@ -59,10 +86,68 @@ internal class HrmProClient : IHrmProClient
 
         if (response.StatusCode == HttpStatusCode.OK)
         {
-            var departments = await
+            var departmentsResponse = await
                 response.Content.ReadFromJsonAsync<ResponseWrapper<List<Department>>>(cancellationToken);
 
-            return departments ?? throw new NotImplementedException();
+            if (departmentsResponse is { Message: true })
+            {
+                cache.Set(key, departmentsResponse, TimeSpan.FromDays(1));
+
+                return departmentsResponse;
+            }
+
+            throw new NotImplementedException();
+        }
+
+        throw new NotImplementedException();
+    }
+
+    public async Task<ResponseWrapper<HrmListResponse<Position>>> GetPositions(string token, ListPositionsQuery query, CancellationToken cancellationToken = default)
+    {
+        string key = $"hrm_pro_positions:{query.OrganizationId}";
+
+        var endpoint = httpConfiguration.Endpoints.Single(x => x.Name == HttpEndpoint.HrmPro_Positions);
+
+        var path = endpoint.Path;
+
+        var pathWithQuery = path + query.GetQueryString();
+
+        var request = new HttpRequestMessage()
+        {
+            RequestUri = new Uri(client.BaseAddress!, pathWithQuery),
+            Method = HttpMethod.Parse(endpoint.Method)
+        };
+
+        request.Headers.TryAddWithoutValidation("Authorization", token);
+
+        var response = await client.SendAsync(request,
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var positionsResponse = await
+                response.Content.ReadFromJsonAsync<ResponseWrapper<HrmListResponse<Position>>>(cancellationToken);
+
+            if (positionsResponse is { Message: true })
+            {
+                // Task.Run(async () =>
+                // {
+                //     if (!query.DepartmentId.HasValue)
+                //     {
+                //         if (positionsResponse.Data.Total > query.PerPage)
+                //         {
+                            
+                //         }
+                //     }
+                //     else
+                //     {
+                //     }
+                // }, cancellationToken);
+
+                return positionsResponse;
+            }
+
+            throw new NotImplementedException();
         }
 
         throw new NotImplementedException();
@@ -74,14 +159,11 @@ internal class HrmProClient : IHrmProClient
 
         var path = endpoint.Path;
 
-        if (!string.IsNullOrWhiteSpace(query))
-        {
-            path += query;
-        }
+        var pathWithQuery = path + query;
 
         var request = new HttpRequestMessage()
         {
-            RequestUri = new Uri(client.BaseAddress!, path),
+            RequestUri = new Uri(client.BaseAddress!, pathWithQuery),
             Method = HttpMethod.Parse(endpoint.Method)
         };
 
@@ -92,10 +174,29 @@ internal class HrmProClient : IHrmProClient
 
         if (response.StatusCode == HttpStatusCode.OK)
         {
-            var positions = await
+            var positionsResponse = await
                 response.Content.ReadFromJsonAsync<ResponseWrapper<HrmListResponse<Position>>>(cancellationToken);
 
-            return positions ?? throw new NotImplementedException();
+            if (positionsResponse is { Message: true })
+            {
+                // Task.Run(async () =>
+                // {
+                //     if (!query.DepartmentId.HasValue)
+                //     {
+                //         if (positionsResponse.Data.Total > query.PerPage)
+                //         {
+                            
+                //         }
+                //     }
+                //     else
+                //     {
+                //     }
+                // }, cancellationToken);
+
+                return positionsResponse;
+            }
+
+            throw new NotImplementedException();
         }
 
         throw new NotImplementedException();
@@ -130,7 +231,7 @@ internal class HrmProClient : IHrmProClient
 
             cache.Set(key, structure!, options: new MemoryCacheEntryOptions()
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(45),
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(1),
             });
 
             return structure!;
@@ -143,7 +244,7 @@ internal class HrmProClient : IHrmProClient
     {
         var endpoint = httpConfiguration.Endpoints.Single(x => x.Name == HttpEndpoint.HrmPro_Workers);
 
-       var path = endpoint.Path;
+        var path = endpoint.Path;
 
         if (!string.IsNullOrWhiteSpace(query))
         {
@@ -217,7 +318,7 @@ internal class HrmProClient : IHrmProClient
         }
         else
         {
-            Console.WriteLine(await response.Content.ReadAsStringAsync());
+            Console.WriteLine(await response.Content.ReadAsStringAsync(cancellationToken));
 
             throw new NotImplementedException();
         }

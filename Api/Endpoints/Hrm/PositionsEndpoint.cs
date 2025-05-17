@@ -1,6 +1,6 @@
-using System.Dynamic;
 using Contacts.Application.ProcessingServices;
 using Contacts.Application.ProcessingServices.Models.Responses.HrmPro;
+using Contacts.Api.Mappings;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,13 +14,16 @@ public static class PositionsEndpoint
     }
 
     static async Task<Ok<ResponseWrapper<HrmListResponse<Position>>>> Handler([FromServices] IHrmProClient httpClient,
-                                                 HttpContext httpContext)
+                                                                              [AsParameters] Contracts.Hrm.ListPositionsQuery query,
+                                                                              HttpContext httpContext)
     {
         var cancellationToken = httpContext.RequestAborted;
 
         var login = await httpClient.Login(cancellationToken);
 
-        var positions = await httpClient.GetPositions(login.TokenValue, httpContext.Request.QueryString.Value ?? "", cancellationToken);
+        var hrmQuery = query.MapTo();
+
+        var positions = await httpClient.GetPositions(login.TokenValue, hrmQuery, cancellationToken);
 
         return TypedResults.Ok(positions);
     }

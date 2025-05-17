@@ -3,6 +3,7 @@ using System;
 using Contacts.Infrastructure.Persistance;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Contacts.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250517102528_AddPhoneNumberPositionUser")]
+    partial class AddPhoneNumberPositionUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -148,9 +151,6 @@ namespace Contacts.Infrastructure.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_phone_number");
-
-                    b.HasIndex("ActiveAssignedPositionUserId")
-                        .HasDatabaseName("ix_phone_number_active_assigned_position_user_id");
 
                     b.HasIndex("ActiveAssignedUserId")
                         .HasDatabaseName("ix_phone_number_active_assigned_user_id");
@@ -407,12 +407,6 @@ namespace Contacts.Infrastructure.Migrations
 
             modelBuilder.Entity("Contacts.Domain.PhoneNumbers.PhoneNumber", b =>
                 {
-                    b.HasOne("Contacts.Domain.Users.User", "ActiveAssignedPositionUser")
-                        .WithMany()
-                        .HasForeignKey("ActiveAssignedPositionUserId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_phone_number_user_active_assigned_position_user_id");
-
                     b.HasOne("Contacts.Domain.Users.User", "ActiveAssignedUser")
                         .WithMany("ActivePhoneNumbers")
                         .HasForeignKey("ActiveAssignedUserId")
@@ -436,8 +430,6 @@ namespace Contacts.Infrastructure.Migrations
                         .HasForeignKey("UpdatedById")
                         .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("fk_phone_number_account_updated_by_id");
-
-                    b.Navigation("ActiveAssignedPositionUser");
 
                     b.Navigation("ActiveAssignedUser");
 

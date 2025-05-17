@@ -25,8 +25,7 @@ public static class ListAccountEndpoint
 
         var result = await handler.HandleListAccount(message, context.RequestAborted);
         
-        var data = await result.Query!.OrderBy(x => x.Id)
-                                      .Select(AccountMapping.AccountDomainToContract.Expand())
+        var data = await result.Query!.Select(AccountMapping.AccountDomainToContract.Expand())
                                       .ToListAsync(context.RequestAborted);
 
         var response = data.ToListResponse(result.PageDetail);
