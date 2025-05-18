@@ -7,7 +7,7 @@ public interface IHrmProcessingService
 {
     Task<List<WorkerWithPhoneNumber>> GetWorkersWithPhoneNumber(List<WorkerResponse> workers, CancellationToken cancellationToken = default);
     Task<List<WorkerWithPhoneNumber>> GetWorkersWithPhoneNumberInPosition(List<WorkerResponse> workers,
-                                                                          int positionId,
+                                                                          int? positionId,
                                                                           CancellationToken cancellationToken = default);
     Task<List<PositionWithPhoneNumber>> GetPositionWithPhoneNumbers(List<Position> positions, CancellationToken cancellationToken = default);
     

@@ -1,5 +1,6 @@
 using Application.Common;
 using Application.Services.Foundations;
+using Contacts.Application.Handlers.Interfaces;
 using Contacts.Contracts.PhoneNumbers;
 using Contracts.Common;
 using Mappings;
@@ -27,6 +28,11 @@ public static class SelectPhoneNumberEndpoint
             queryable = queryable.Where(p => p.ActiveAssignedPositionId == query.PositionId);
         }
 
+        if (query.Search?.Trim() is { } search)
+        {
+            queryable = queryable.Where(x => x.Number.Contains(search));
+        }
+
         int total = await queryable.CountAsync(context.RequestAborted);
 
         var pagination = query.ToPagination();
@@ -38,7 +44,7 @@ public static class SelectPhoneNumberEndpoint
         var data = await queryable.Select(x => new SelectPhoneNumber(x.Id, x.Number))
             .ToListAsync(context.RequestAborted);
 
-        PageDetail pageDetail = new (pagination, total);
+        PageDetail pageDetail = new(pagination, total);
 
         return TypedResults.Ok(data.ToListResponse(pageDetail));
     }

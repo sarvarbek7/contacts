@@ -14,6 +14,9 @@ public record ListPhoneNumbersQuery : PagedRecordQuery
 
     [FromQuery(Name = "user")]
     public string? User { get; init; }
+
+    [FromQuery(Name = "positionUser")]
+    public string? PositionUser { get; init; }
     
     [FromQuery(Name = "userExternalId")]
     public int? UserExternalId { get; init; }

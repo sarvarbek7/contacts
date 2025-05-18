@@ -13,4 +13,7 @@ public class PositionUserPhoneNumber : IEntity<long>,
     public DateTime CreatedAt { get; set; }
     public Account? CreatedBy { get; set; }
     public int? CreatedById { get; set; }
+    public Account? RemovedBy { get; set; }
+    public int? RemovedById { get; set; }
+    public DateTime? RemovedAt { get; set; }
 }

@@ -20,6 +20,8 @@ public static class PhoneNumbersGroup
         group.MapAssignPositionUserPhoneNumber();
         group.MapSelectPhoneNumbers();
         group.MapListPhoneNumbersForPositionClient();
+        group.MapAssignPositionPhoneNumberBatchEndpoint();
+        group.MapRemovePositionUserPhoneNumber();
 
         return group;
     }

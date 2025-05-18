@@ -47,6 +47,7 @@ public static class PhoneNumberMapping
         return new ListPhoneNumbersMessage(query.ToPagination(),
                                            query.Number,
                                            query.User,
+                                           query.PositionUser,
                                            query.Status,
                                            query.UserExternalId,
                                            query.PositionId,
@@ -130,7 +131,10 @@ public static class PhoneNumberMapping
 
     public static ListPhoneNumbersForPositionMessage MapTo(this ListPhoneNumbersForPositionQuery query)
         => new(query.OrganizationId, query.PositionId);
-        
-     public static ListPhoneNumbersForPositionMessageClient MapToClientMessage(this ListPhoneNumbersForPositionQuery query)
-        => new (query.OrganizationId, query.PositionId);
+
+    public static ListPhoneNumbersForPositionMessageClient MapToClientMessage(this ListPhoneNumbersForPositionQuery query)
+       => new(query.OrganizationId, query.PositionId);
+
+    public static SelectPhoneNumberMessage MapTo(this SelectPhoneNumbersQuery query)
+      => new(query.PositionId, query.ToPagination());
 }

@@ -79,6 +79,17 @@ public class PhoneNumber : IEntity<Guid>,
         PositionUsersHistory.Add(history);
     }
 
+    public void UnAssignPositionUser(int accountId)
+    {
+        ActiveAssignedPositionUserId = null;
+
+        foreach (var history in UsersHistory.Where(x => x.IsActive))
+        {
+            history.IsActive = false;
+            history.RemovedAt = DateTime.UtcNow;
+            history.RemovedById = accountId;
+        }
+    }
 
     public void AssignPosition(int positionId,
                                int organizationId,
@@ -107,6 +118,7 @@ public class PhoneNumber : IEntity<Guid>,
     public void UnAssignPosition(int accountId)
     {
         ActiveAssignedPositionId = null;
+        ActiveAssignedOrganizationId = null;
 
         foreach (var history in PositionHistory.Where(x => x.IsActive))
         {

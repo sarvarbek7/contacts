@@ -11,7 +11,8 @@ public interface IPhoneNumberHandler
     Task<ErrorOr<Success>> HandlePositionUserAssignPhoneNumber(AssignPositionUserPhoneNumberMessage message, CancellationToken cancellationToken = default);
     Task<ErrorOr<Success>> HandleUserAssignPhoneNumber(AssignUserPhoneNumberMessage message, CancellationToken cancellationToken = default);
     Task<ErrorOr<Success>> HandlePositionAssignPhoneNumber(AssignPositionPhoneNumberMessage message, CancellationToken cancellationToken = default);
-    Task<ErrorOr<Success>> HandleRemovePhoneNumber(RemoveUserPhoneNumberMessage message, CancellationToken cancellationToken = default);
+    Task<ErrorOr<Success>> HandleRemoveUserPhoneNumber(RemoveUserPhoneNumberMessage message, CancellationToken cancellationToken = default);
+    Task<ErrorOr<Success>> HandleRemovePositionUserPhoneNumber(RemovePositionUserPhoneNumberMessage message, CancellationToken cancellationToken = default);
     Task<ErrorOr<Success>> HandleRemovePhoneNumberFromPosition(RemovePositionPhoneNumberMessage message, CancellationToken cancellationToken = default);
     Task<ErrorOr<Created>> HandleCreate(CreatePhoneNumberMessage message, CancellationToken cancellationToken = default);
     Task<ErrorOr<Updated>> HandleUpdate(UpdatePhoneNumberMessage message, CancellationToken cancellationToken = default);
@@ -21,4 +22,5 @@ public interface IPhoneNumberHandler
     Task<ListResult<PhoneNumberListItem>> HandleSearchByUser(SearchPhoneNumbersByUserMessage message, CancellationToken cancellationToken = default);
     Task<List<WorkerWithPhoneNumber>> HandlePositionPhoneNumbers(ListPhoneNumbersForPositionMessage message, CancellationToken cancellationToken = default);
     Task<List<WorkerWithPhoneNumber>> HandlePositionPhoneNumbersClient(ListPhoneNumbersForPositionMessageClient message, CancellationToken cancellationToken = default);
+    // Task<ListResult<Guid>> HandleSelectPhoneNumbers(SelectPhoneNumberMessage message, CancellationToken cancellationToken = default);
 }

@@ -60,9 +60,9 @@ internal class HrmProcessingService(IBaseService<PhoneNumber, Guid> phoneNumberS
         if (workerIds.Count > 0)
         {
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var storedPhoneNumbersForWorkers = await phoneNumberService.GetAll(x => workerIds.Contains(x.ActiveAssignedUser.ExternalId),
+            var storedPhoneNumbersForWorkers = await phoneNumberService.GetAll(x => workerIds.Contains(x.ActiveAssignedPositionUser.ExternalId),
                                                                                tracked: false)
-                .Include(x => x.ActiveAssignedUser)
+                .Include(x => x.ActiveAssignedPositionUser)
                 .ToListAsync(cancellationToken);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
@@ -74,13 +74,13 @@ internal class HrmProcessingService(IBaseService<PhoneNumber, Guid> phoneNumberS
         foreach (var worker in workers)
         {
             var userPhoneNumbers =
-                phoneNumbers.Where(x => x.ActiveAssignedUser!.ExternalId == worker.Id)
+                phoneNumbers.Where(x => x.ActiveAssignedPositionUser!.ExternalId == worker.Id && x.ActiveAssignedPositionId == worker.DepartmentPosition.Id)
                 .Select(x => new PhoneNumberItem()
                 {
                     Id = x.Id,
                     Number = x.Number,
                 }).ToList();
-            
+
             WorkerWithPhoneNumber workerWithPhoneNumber = new()
             {
                 Id = worker.Id,
@@ -98,7 +98,7 @@ internal class HrmProcessingService(IBaseService<PhoneNumber, Guid> phoneNumberS
     }
 
     public async Task<List<WorkerWithPhoneNumber>> GetWorkersWithPhoneNumberInPosition(List<WorkerResponse> workers,
-                                                                                       int positionId,
+                                                                                       int? positionId,
                                                                                        CancellationToken cancellationToken = default)
     {
         var workerIds = workers.Select(x => x.Id).ToList();
@@ -108,12 +108,19 @@ internal class HrmProcessingService(IBaseService<PhoneNumber, Guid> phoneNumberS
         if (workerIds.Count > 0)
         {
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var storedPhoneNumbersForWorkers = await phoneNumberService.GetAll(x => x.ActiveAssignedPositionId == positionId && x.ActiveAssignedPositionUserId != null &&
+            IQueryable<PhoneNumber> query = phoneNumberService.GetAll(x => x.ActiveAssignedPositionUserId != null &&
                                                                                workerIds.Contains(x.ActiveAssignedPositionUser.ExternalId),
                                                                                tracked: false)
-                                                    .Include(x => x.ActiveAssignedPositionUser)
-                .ToListAsync(cancellationToken);
+                                                    .Include(x => x.ActiveAssignedPositionUser);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
+
+            if (positionId.HasValue)
+            {
+                query = query.Where(x => x.ActiveAssignedPositionId == positionId.Value);
+            }
+
+            var storedPhoneNumbersForWorkers = await query
+            .ToListAsync(cancellationToken);
 
             phoneNumbers.AddRange(storedPhoneNumbersForWorkers);
         }
@@ -129,7 +136,7 @@ internal class HrmProcessingService(IBaseService<PhoneNumber, Guid> phoneNumberS
                     Id = x.Id,
                     Number = x.Number,
                 }).ToList();
-            
+
             WorkerWithPhoneNumber workerWithPhoneNumber = new()
             {
                 Id = worker.Id,

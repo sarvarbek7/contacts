@@ -8,6 +8,6 @@ public record PhoneNumberListItem(Guid Id, string Number, User? AssignedUser, in
  public static Expression<Func<Domain.PhoneNumbers.PhoneNumber, PhoneNumberListItem>> To =>
         x => new PhoneNumberListItem(x.Id,
                                      x.Number,
-                                     x.ActiveAssignedUser,
+                                     x.ActiveAssignedPositionUser,
                                      x.ActiveAssignedPositionId);
 }

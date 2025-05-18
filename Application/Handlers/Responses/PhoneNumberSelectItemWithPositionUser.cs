@@ -1,0 +1,3 @@
+namespace Contacts.Application.Handlers.Responses;
+
+public record PhoneNumberSelectItemWithPositionUser;

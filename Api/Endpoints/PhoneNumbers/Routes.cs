@@ -12,8 +12,9 @@ public static class Routes
     public const string AssignUserPhoneNumber = "{id::guid}/assign/user";
     public const string AssignPositionUserPhoneNumber = "{id::guid}/assign/position-user";
     public const string AssignPositionPhoneNumber = "{id::guid}/assign/position";
+    public const string AssignPositionPhoneNumberBatch = "/assign/position/batch";
     public const string RemoveUserPhoneNumber = "{id:guid}/remove/user";
-    public const string RemovePositionUserPhoneNumber = "{id:guid}/remove/user-position";
+    public const string RemovePositionUserPhoneNumber = "{id:guid}/remove/position-user";
     public const string RemovePositionPhoneNumber = "{id:guid}/remove/position";
     public const string ListPhoneNumbers = "";
     public const string SearchPhoneNumbersByUser = "by-user";
