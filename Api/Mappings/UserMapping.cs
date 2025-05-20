@@ -1,11 +1,15 @@
 using System.Linq.Expressions;
+using Contacts.Application.Handlers.Messages.Users;
 using Contacts.Contracts.Users;
-using LinqKit;
+using Mappings;
 
 namespace Contacts.Api.Mappings;
 
 public static class UserMapping
 {
+    public static SelectUsersMessage MapTo(this SelectQuery query)
+        => new (query.Search, query.HaveNumber, query.ToPagination());
+
     public static Domain.Users.User MapTo(this HrmUser dto)
     {
         return new Domain.Users.User()

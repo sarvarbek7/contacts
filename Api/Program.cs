@@ -11,6 +11,8 @@ using Contacts.Api.Endpoints.Auth;
 using Contacts.Api.Endpoints.Accounts;
 using Serilog;
 using Api;
+using System.Text.Json;
+using Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,6 +82,14 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 await Seeder.SeedData(app.Services);
+
+var json = Path.Combine(app.Environment.ContentRootPath, "Resources", "Errors.json");
+
+var jsonText = File.ReadAllText(json);
+
+var errors = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(jsonText);
+
+Translation.AddTranslations(errors);
 
 var api = app.MapGroup("api");
 

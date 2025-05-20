@@ -10,6 +10,7 @@ public class User : IEntity<int>, IFromExternalSource<int>
     public int Id { get; init; }
     public int ExternalId { get; init; }
     public List<PhoneNumber> ActivePhoneNumbers { get; set; } = [];
+    public List<PhoneNumber> ActivePhonePositionNumbers { get; set; } = [];
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
     public string? MiddleName { get; set; }

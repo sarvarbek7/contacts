@@ -1,3 +1,4 @@
+using Api.Extensions;
 using Contacts.Api.Extensions;
 using Contacts.Application.Handlers.Interfaces;
 using Contacts.Application.Handlers.Messages.PhoneNumbers;
@@ -25,9 +26,9 @@ public static class DeletePhoneNumberEndpoint
 
         if (result.IsError)
         {
-            // TODO: add error
+            var problemDetails = result.FirstError.ToProblemDetails(context.GetLanguage());
 
-            throw new NotImplementedException();
+            return TypedResults.Problem(problemDetails);
         }
 
         return TypedResults.NoContent();

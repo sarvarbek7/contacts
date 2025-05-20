@@ -29,7 +29,7 @@ internal class PhoneNumberConfig : IEntityTypeConfiguration<PhoneNumber>
             .OnDelete(DeleteBehavior.SetNull);
         
         builder.HasOne(x => x.ActiveAssignedPositionUser)
-            .WithMany()
+            .WithMany(x => x.ActivePhonePositionNumbers)
             .HasForeignKey(x => x.ActiveAssignedPositionUserId)
             .OnDelete(DeleteBehavior.SetNull);
     }

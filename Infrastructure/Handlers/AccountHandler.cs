@@ -1,6 +1,7 @@
 using Application.Common;
 using Application.Common.Extensions;
 using Application.Services.Foundations;
+using Contacts.Application.Common.Errors;
 using Contacts.Application.Handlers.Interfaces;
 using Contacts.Application.Handlers.Messages.Accounts;
 using Contacts.Application.ProcessingServices;
@@ -16,19 +17,16 @@ internal class AccountHandler(IBaseService<Account, int> accountService,
     public async Task<ErrorOr<Account>> HandleCreateAccount(CreateAccountMessage message, CancellationToken cancellationToken = default)
     {
         var storedAccount = await accountService.GetAll(x => x.Login == message.Login)
-           // TODO: Add error
            .SingleOrDefaultAsync(cancellationToken);
 
         if (storedAccount is not null)
         {
-            // TODO: Account already exists error
-            throw new NotImplementedException();
+            return ApplicationErrors.AccountExists;
         }
 
-        if (string.IsNullOrWhiteSpace(message.Password))
+        if (message.Login is {Length: < 8})
         {
-            // TODO: Invalid password
-            throw new NotImplementedException();
+            return ApplicationErrors.InvalidPassword;
         }
 
         var passwordHash = passwordHashingService.GenerateHash(message.Password);

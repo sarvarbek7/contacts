@@ -1,3 +1,4 @@
+using Api.Extensions;
 using Contacts.Api.Extensions;
 using Contacts.Api.Mappings;
 using Contacts.Application.Handlers.Interfaces;
@@ -26,9 +27,9 @@ public static class CreatePhoneNumberEndpoint
 
         if (result.IsError)
         {
-            // Add to error details
+            var problemDetails = result.FirstError.ToProblemDetails(context.GetLanguage());
 
-            throw new NotImplementedException();
+            return TypedResults.Problem(problemDetails);
         }
 
         return TypedResults.NoContent();

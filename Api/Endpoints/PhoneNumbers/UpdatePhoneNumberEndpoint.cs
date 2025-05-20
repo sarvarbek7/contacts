@@ -1,3 +1,4 @@
+using Api.Extensions;
 using Contacts.Api.Extensions;
 using Contacts.Api.Mappings;
 using Contacts.Application.Handlers.Interfaces;
@@ -27,8 +28,9 @@ public static class UpdatePhoneNumberEndpoint
 
         if (result.IsError)
         {
-            // TODO: add error
-            throw new NotImplementedException();
+            return TypedResults.Problem(
+                problemDetails: result.FirstError.ToProblemDetails(
+                    languageEnum: context.GetLanguage()));
         }
 
         return TypedResults.NoContent();

@@ -118,6 +118,7 @@ public class PhoneNumber : IEntity<Guid>,
     public void UnAssignPosition(int accountId)
     {
         ActiveAssignedPositionId = null;
+        ActiveAssignedPositionUserId = null;
         ActiveAssignedOrganizationId = null;
 
         foreach (var history in PositionHistory.Where(x => x.IsActive))

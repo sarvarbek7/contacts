@@ -1,4 +1,5 @@
 using Application.Validators;
+using Contacts.Application.Common.Errors;
 using Contacts.Domain.Users;
 using ErrorOr;
 
@@ -10,8 +11,7 @@ internal class UserValidator : IValidator<User, int>
     {
         if (model.ExternalId == default)
         {
-            // TODO: return InvalidExternalId error
-            throw new NotImplementedException();
+            return ApplicationErrors.InvalidUserExternalId;
         }
 
         return new Created();

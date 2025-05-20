@@ -7,6 +7,6 @@ namespace Contacts.Application.Handlers.Interfaces;
 
 public interface IAuthHandler
 {
-    public Task<LoginResponse> HandleLogin(LoginMessage message,
+    public Task<ErrorOr<LoginResponse>> HandleLogin(LoginMessage message,
                                            CancellationToken cancellationToken = default);
 }

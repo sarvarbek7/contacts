@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Application.Services.Foundations;
+using Contacts.Application.Common.Errors;
 using Contacts.Application.Handlers.Interfaces;
 using Contacts.Application.Handlers.Messages.Auth;
 using Contacts.Application.ProcessingServices;
@@ -14,17 +15,20 @@ internal class AuthHandler(IBaseService<Account, int> accountService,
                            IPasswordHashingService passwordHashingService,
                            IJwtTokenService jwtTokenService) : IAuthHandler
 {
-    public async Task<LoginResponse> HandleLogin(LoginMessage message,
+    public async Task<ErrorOr<LoginResponse>> HandleLogin(LoginMessage message,
         CancellationToken cancellationToken = default)
     {
         var storedAccount = await accountService.GetAll(x => x.Login == message.Login)
-            // TODO: Add error
-            .SingleOrDefaultAsync(cancellationToken) ?? throw new NotImplementedException();
+            .SingleOrDefaultAsync(cancellationToken);
+
+        if (storedAccount is null)
+        {
+            return ApplicationErrors.InvalidCredentials;
+        }
 
         if (!passwordHashingService.VerifyPassword(message.Password, storedAccount.Password))
         {
-            // TODO: Add error
-            throw new NotImplementedException();
+            return ApplicationErrors.InvalidCredentials;
         }
 
         List<Claim> claims = [];

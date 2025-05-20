@@ -1,3 +1,5 @@
+using Api.Extensions;
+using Contacts.Api.Extensions;
 using Contacts.Api.Mappings;
 using Contacts.Application.Handlers.Interfaces;
 using Contacts.Contracts.Auth;
@@ -22,7 +24,13 @@ public static class LoginEndpoint
         var result = await authHandler.HandleLogin(message,
             context.RequestAborted);
 
+        if (result.IsError)
+        {
+            return TypedResults.Problem(
+                problemDetails: result.FirstError.ToProblemDetails(
+                    languageEnum: context.GetLanguage()));
+        }
 
-        return TypedResults.Ok(result.MapTo());
+        return TypedResults.Ok(result.Value.MapTo());
     }
 }

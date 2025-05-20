@@ -1,4 +1,5 @@
 using Application.Common;
+using Application.Common.Extensions;
 using Application.Services.Foundations;
 using Contacts.Application.Handlers.Interfaces;
 using Contacts.Contracts.PhoneNumbers;

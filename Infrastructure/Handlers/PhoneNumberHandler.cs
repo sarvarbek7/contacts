@@ -14,6 +14,7 @@ using LinqKit;
 using Microsoft.EntityFrameworkCore;
 using Contacts.Infrastructure.Extensions;
 using Application.Common.Extensions;
+using System.Diagnostics.Contracts;
 
 namespace Contacts.Infrastructure.Handlers;
 
@@ -46,8 +47,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
         if (phoneNumber.ActiveAssignedUser is not null)
         {
-            // TODO: already assigned first retain
-            throw new NotImplementedException();
+            return Application.Common.Errors.ApplicationErrors.NumberAlreadyAssignedToUser;
         }
 
         phoneNumber.AssignUser(user, message.OrganizationId, message.UserAccountIdWhoDoesAction);
@@ -69,8 +69,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
         if (phoneNumberExists)
         {
-            // TODO: add error already exists
-            throw new NotImplementedException();
+            return Application.Common.Errors.ApplicationErrors.PhoneNumberAlreadyExists;
         }
 
         return await phoneNumberService.Add(phoneNumber, true, cancellationToken);
@@ -137,15 +136,19 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
             query = status switch
             {
                 Status.NotAssigned => query.Where(x => x.ActiveAssignedPositionId == null && x.ActiveAssignedPositionUserId == null),
-                Status.AssignedToUser => query.Where(x => x.ActiveAssignedPositionUser != null && x.ActiveAssignedPositionId == null),
+                Status.AssignedToUser => query.Where(x => x.ActiveAssignedPositionUser != null),
                 Status.AssignedToPosition => query.Where(x => x.ActiveAssignedPositionUser == null && x.ActiveAssignedPositionId != null),
                 Status.AssignedToPosition | Status.AssignedToUser => query.Where(x => x.ActiveAssignedPositionId != null || x.ActiveAssignedPositionId == null),
                 _ => query,
             };
         }
 
+        bool userFilter = false;
+
         if (message.User?.Trim().ToLower() is { } user)
         {
+            userFilter = true;
+
             var names = user.Split(' ', StringSplitOptions.RemoveEmptyEntries |
                                         StringSplitOptions.TrimEntries);
 
@@ -229,17 +232,40 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
         foreach (var phoneNumber in data)
         {
-            var phoneNumberWithPosition = new PhoneNumberListItemWithPosition(phoneNumber.Id, 
+            WorkerResponse? worker = null;
+
+
+            if (phoneNumber.AssignedUser is not null)
+            {
+                worker = workers.FirstOrDefault(x => x.Id == phoneNumber.AssignedUser.ExternalId);
+
+                if (worker is not null && worker.DepartmentPosition.Id != phoneNumber.PositionId)
+                {
+                    // TODO worker change position
+                    Console.WriteLine("worker change position");
+
+                    worker = null;
+                }
+            }
+
+            Position? position = null;
+
+            if (phoneNumber.PositionId != null)
+            {
+                position = positions.FirstOrDefault(x => x.Id == phoneNumber.PositionId);
+            }
+
+            var phoneNumberWithPosition = new PhoneNumberListItemWithPosition(phoneNumber.Id,
                                                                               phoneNumber.Number,
-                                                                              
-                                                                              phoneNumber.AssignedUser != null 
-                                                                                  ? workers.FirstOrDefault(x => x.Id == phoneNumber.AssignedUser.ExternalId && x.DepartmentPosition.Id == phoneNumber.PositionId)
-                                                                                  : null,
-                                                                              
-                                                                              phoneNumber.PositionId != null 
-                                                                                  ? positions.FirstOrDefault(x => x.Id == phoneNumber.PositionId)
-                                                                                  : null);
-            phoneNumberListItemWithPositions.Add(phoneNumberWithPosition);
+                                                                              worker,
+                                                                              position);
+            if (userFilter && worker is null)
+            {
+            }
+            else
+            {
+                phoneNumberListItemWithPositions.Add(phoneNumberWithPosition);
+            }
         }
 
         return message.ToListResultWithData(phoneNumberListItemWithPositions, total);
@@ -357,11 +383,11 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
             workers.AddRange(listResponse.Data);
         }
 
-        var workerIds = workers.Select(x =>x.Id).ToList();
+        var workerIds = workers.Select(x => x.Id).ToList();
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-        var workerIdsWhoHasPhoneNumber = await phoneNumberService.GetAll(x => workerIds.Contains(x.ActiveAssignedUser.ExternalId))
-            .Select(x=>x.ActiveAssignedUser.ExternalId).ToListAsync(cancellationToken);
+        var workerIdsWhoHasPhoneNumber = await phoneNumberService.GetAll(x => workerIds.Contains(x.ActiveAssignedPositionUser.ExternalId))
+            .Select(x => x.ActiveAssignedPositionUser.ExternalId).ToListAsync(cancellationToken);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
         var workersWhoHasPhoneNumber = workers.Where(x => workerIdsWhoHasPhoneNumber.Contains(x.Id)).ToList();
@@ -417,8 +443,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
         if (phoneNumber.ActiveAssignedPositionId != message.PositionId)
         {
-            // TODO: implement phone number not assigned to user
-            throw new NotImplementedException();
+            return Application.Common.Errors.ApplicationErrors.PhoneNumberNotAssignedToPosition;
         }
 
         phoneNumber.AssignPositionUser(user, message.UserAccountIdWhoDoesAction);
@@ -459,12 +484,12 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
             workers.AddRange(listResponse.Data);
         }
 
-        var workerIds = workers.Select(x =>x.Id).ToList();
+        var workerIds = workers.Select(x => x.Id).ToList();
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
         var workerIdsWhoHasPhoneNumber = await phoneNumberService.GetAll(x => x.ActiveAssignedPositionUserId != null &&
                                                                          workerIds.Contains(x.ActiveAssignedPositionUser.ExternalId))
-            .Select(x=>x.ActiveAssignedPositionUser.ExternalId).ToListAsync(cancellationToken);
+            .Select(x => x.ActiveAssignedPositionUser.ExternalId).ToListAsync(cancellationToken);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
         var workersWhoHasPhoneNumber = workers.Where(x => workerIdsWhoHasPhoneNumber.Contains(x.Id)).ToList();

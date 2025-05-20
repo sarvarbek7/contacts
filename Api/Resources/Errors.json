@@ -1,0 +1,62 @@
+{
+  "ApplicationErrors.ExternalServerError": {
+    "uz": "Tashqi tizimlar bilan ma'lumot almashishda xatolik sodir bo'ldi. Birozdan keyin urinib ko'ring.",
+    "ru": "Произошла ошибка при обмене данными с внешними системами. Пожалуйста, попробуйте снова позже.",
+    "en": "An error occurred while communicating with external systems. Please try again later.",
+    "kril": "Ташқи тизимлар билан маълумот алмашишда хатолик содир бўлди. Бироздан кейин уриниб кўринг."
+  },
+  "ApplicationErrors.UserNotFoundInHRMSystem": {
+    "uz": "Xodim ma'lumotlari Exodim tizimidan topilmadi.",
+    "ru": "Данные сотрудника не найдены в системе Exodim.",
+    "en": "Employee data not found in the Exodim system.",
+    "kril": "Ходим маълумотлари Эхдим тизимидан топилмади."
+  },
+  "ApplicationErrors.PhoneNumberAlreadyExists": {
+    "uz": "Telefon raqam tizimda mavjud.",
+    "ru": "Номер телефона уже существует в системе.",
+    "en": "The phone number already exists in the system.",
+    "kril": "Телефон рақам тизимда мавжуд."
+  },
+  "ApplicationErrors.InvalidPhoneNumber": {
+    "uz": "Telefon nomer formati xato. Iltimos to'g'irlab, qayta urinib ko'ring.",
+    "ru": "Неверный формат номера телефона. Пожалуйста, исправьте и попробуйте снова.",
+    "en": "Invalid phone number format. Please correct it and try again.",
+    "kril": "Телефон номер формати хато. Илтимос тўғирлаб, қайта уриниб кўринг."
+  },
+  "ApplicationErrors.AccountExists": {
+    "uz": "Tizimdan ushbu login orqali foydalanuvchi ro'yhatga olingan.",
+    "ru": "Пользователь с таким логином уже зарегистрирован в системе.",
+    "en": "A user with this login is already registered in the system.",
+    "kril": "Тизимдан ушбу логин орқали фойдаланувчи рўйхатга олинган."
+  },
+  "ApplicationErrors.InvalidCredentials": {
+    "uz": "Login yoki parol xato.",
+    "ru": "Неверный логин или пароль.",
+    "en": "Incorrect login or password.",
+    "kril": "Логин ёки парол хато."
+  },
+  "ApplicationErrors.InvalidPassword": {
+    "uz": "Parol kamida 8 ta belgidan iborat bo'lishi kerak.",
+    "ru": "Пароль должен содержать не менее 8 символов.",
+    "en": "The password must contain at least 8 characters.",
+    "kril": "Парол камида 8 та белгидан иборат б�capillaryиши керак."
+  },
+  "ApplicationErrors.NumberAlreadyAssignedToUser": {
+    "uz": "Ushbu raqam xodimga biriktirilgan.",
+    "ru": "Этот номер уже привязан к сотруднику.",
+    "en": "This number is already assigned to an employee.",
+    "kril": "Ушбу рақам ходимга бириктирилган."
+  },
+  "ApplicationErrors.PhoneNumberNotAssignedToPosition": {
+    "uz": "Ushbu telefon raqam boshqa lavozimga biriktirilgan.",
+    "ru": "Этот номер телефона привязан к другой должности.",
+    "en": "This phone number is assigned to another position.",
+    "kril": "Ушбу телефон рақам бошқа лавозимга бириктирилган."
+  },
+  "ApplicationErrors.InvalidUserExternalId": {
+    "uz": "Kiritilgan ma'lumot xato.",
+    "ru": "Введенные данные неверны.",
+    "en": "The entered data is incorrect.",
+    "kril": "Киритилган маълумот хато."
+  }
+}

@@ -47,7 +47,6 @@ public static class PhoneNumberMapping
         return new ListPhoneNumbersMessage(query.ToPagination(),
                                            query.Number,
                                            query.User,
-                                           query.PositionUser,
                                            query.Status,
                                            query.UserExternalId,
                                            query.PositionId,

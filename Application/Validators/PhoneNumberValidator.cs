@@ -1,4 +1,5 @@
 using Application.Validators;
+using Contacts.Application.Common.Errors;
 using Contacts.Domain.PhoneNumbers;
 using ErrorOr;
 
@@ -59,7 +60,6 @@ internal class PhoneNumberValidator : BaseValidator<PhoneNumber, Guid>, IValidat
             }
         }
 
-        // TODO: return InvalidPhoneNumber error
-        throw new NotImplementedException();
+        return ApplicationErrors.InvalidPhoneNumber;
     }
 }

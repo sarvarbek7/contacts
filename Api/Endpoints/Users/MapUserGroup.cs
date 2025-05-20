@@ -8,6 +8,7 @@ public static class MapUserGroup
 
         users.MapPostUsers();
         // users.MapUserByExternalId();
+        users.MapSelectUser();
 
         return users;
     }
