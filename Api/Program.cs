@@ -13,6 +13,7 @@ using Serilog;
 using Api;
 using System.Text.Json;
 using Shared;
+using Contacts.Application.ProcessingServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,14 +83,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 await Seeder.SeedData(app.Services);
+AddErrors(app.Environment.ContentRootPath);
 
-var json = Path.Combine(app.Environment.ContentRootPath, "Resources", "Errors.json");
-
-var jsonText = File.ReadAllText(json);
-
-var errors = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(jsonText);
-
-Translation.AddTranslations(errors);
+await SubscribePositionChanging(app.Services);
 
 var api = app.MapGroup("api");
 
@@ -100,3 +96,25 @@ api.MapAuth();
 api.MapAccounts();
 
 app.Run();
+
+static void AddErrors(string contentRootPath)
+{
+    var json = Path.Combine(contentRootPath, "Resources", "Errors.json");
+
+    var jsonText = File.ReadAllText(json);
+
+    var errors = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(jsonText)
+        ?? throw new InvalidOperationException("Errors json not exitst");
+
+    Translation.AddTranslations(errors);
+}
+
+async static Task SubscribePositionChanging(IServiceProvider provider)
+{
+    await using var scope = provider.CreateAsyncScope();
+
+    var notifier = scope.ServiceProvider.GetRequiredService<IPositionChangingNotifier>();
+    var receiver = scope.ServiceProvider.GetRequiredService<IPositionChangingReceiver>();
+
+    notifier.Subscribe(receiver);
+}

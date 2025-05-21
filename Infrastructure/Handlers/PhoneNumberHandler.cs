@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Contacts.Infrastructure.Extensions;
 using Application.Common.Extensions;
 using System.Diagnostics.Contracts;
+using Contacts.Application.ProcessingServices.Models;
 
 namespace Contacts.Infrastructure.Handlers;
 
@@ -22,7 +23,8 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
                          IUserHandler userHandler,
                          IHrmProClient hrmClient,
                          IHrmProcessingService hrmProcessingService,
-                         ITranslationService translationService) : IPhoneNumberHandler
+                         ITranslationService translationService,
+                         IPositionChangingNotifier notifier) : IPhoneNumberHandler
 {
     public async Task<ErrorOr<Success>> HandleUserAssignPhoneNumber(AssignUserPhoneNumberMessage message, CancellationToken cancellationToken = default)
     {
@@ -241,10 +243,16 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
                 if (worker is not null && worker.DepartmentPosition.Id != phoneNumber.PositionId)
                 {
-                    // TODO worker change position
-                    Console.WriteLine("worker change position");
+                    var positionMesage = new PositionChangedMessage()
+                    {
+                        PositionId = phoneNumber.PositionId ?? 0,
+                        UserExternalId = worker.Id
+                    };
 
                     worker = null;
+
+                    // TODO must be tested
+                    notifier.Notify(positionMesage);
                 }
             }
 

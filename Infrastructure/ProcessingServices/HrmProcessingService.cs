@@ -1,13 +1,15 @@
 using Application.Services.Foundations;
 using Contacts.Application.Handlers.Responses;
 using Contacts.Application.ProcessingServices;
+using Contacts.Application.ProcessingServices.Models;
 using Contacts.Application.ProcessingServices.Models.Responses.HrmPro;
 using Contacts.Domain.PhoneNumbers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Contacts.Infrastructure.ProcessingServices;
 
-internal class HrmProcessingService(IBaseService<PhoneNumber, Guid> phoneNumberService) : IHrmProcessingService
+internal class HrmProcessingService(IBaseService<PhoneNumber, Guid> phoneNumberService,
+    IPositionChangingNotifier notifier) : IHrmProcessingService
 {
     public async Task<List<PositionWithPhoneNumber>> GetPositionWithPhoneNumbers(List<Position> positions, CancellationToken cancellationToken = default)
     {
@@ -73,8 +75,23 @@ internal class HrmProcessingService(IBaseService<PhoneNumber, Guid> phoneNumberS
 
         foreach (var worker in workers)
         {
+            var userPhones = phoneNumbers.Where(x => x.ActiveAssignedPositionUser!.ExternalId == worker.Id);
+
+            var changePositionPhoneNumbers = userPhones.Where(x => x.ActiveAssignedPositionId != worker.DepartmentPosition.Id);
+
+            foreach (var changePositionPhoneNumber in changePositionPhoneNumbers)
+            {
+                var positionChangedMessage = new PositionChangedMessage()
+                {
+                    PositionId = changePositionPhoneNumber.ActiveAssignedPositionId ?? 0,
+                    UserExternalId = worker.Id
+                };
+
+                notifier.Notify(positionChangedMessage);
+            }
+
             var userPhoneNumbers =
-                phoneNumbers.Where(x => x.ActiveAssignedPositionUser!.ExternalId == worker.Id && x.ActiveAssignedPositionId == worker.DepartmentPosition.Id)
+                userPhones.Where(x => x.ActiveAssignedPositionId == worker.DepartmentPosition.Id)
                 .Select(x => new PhoneNumberItem()
                 {
                     Id = x.Id,

@@ -7,7 +7,6 @@ using Contacts.Infrastructure.ProcessingServices;
 using Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Npgsql.Replication.PgOutput.Messages;
 
 namespace Contacts.Infrastructure;
 
@@ -37,6 +36,9 @@ public static class DependencyInjection
 
         services.AddSingleton<IPasswordHashingService, PasswordHashingService>();
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
+
+        services.AddSingleton<IPositionChangingNotifier, PositionChangingNotifier>();
+        services.AddSingleton<IPositionChangingReceiver, PositionChangingReceiver>();
     }
 
     private static void AddHttpClients(IServiceCollection services)
