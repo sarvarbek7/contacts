@@ -14,8 +14,8 @@ using LinqKit;
 using Microsoft.EntityFrameworkCore;
 using Contacts.Infrastructure.Extensions;
 using Application.Common.Extensions;
-using System.Diagnostics.Contracts;
 using Contacts.Application.ProcessingServices.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Contacts.Infrastructure.Handlers;
 
@@ -24,7 +24,8 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
                          IHrmProClient hrmClient,
                          IHrmProcessingService hrmProcessingService,
                          ITranslationService translationService,
-                         IPositionChangingNotifier notifier) : IPhoneNumberHandler
+                         IPositionChangingNotifier notifier,
+                         ILogger<PhoneNumberHandler> logger) : IPhoneNumberHandler
 {
     public async Task<ErrorOr<Success>> HandleUserAssignPhoneNumber(AssignUserPhoneNumberMessage message, CancellationToken cancellationToken = default)
     {
@@ -243,7 +244,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
                 if (worker is not null && worker.DepartmentPosition.Id != phoneNumber.PositionId)
                 {
-                    var positionMesage = new PositionChangedMessage()
+                    var positionChangedMessage = new PositionChangedMessage()
                     {
                         PositionId = phoneNumber.PositionId ?? 0,
                         UserExternalId = worker.Id
@@ -251,8 +252,19 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
                     worker = null;
 
-                    // TODO must be tested
-                    notifier.Notify(positionMesage);
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            notifier.Notify(positionChangedMessage);
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.LogError(ex, "Error occuring while notify position change");
+                        }
+                    }, CancellationToken.None);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 }
             }
 

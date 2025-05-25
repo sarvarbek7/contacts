@@ -5,11 +5,13 @@ using Contacts.Application.ProcessingServices.Models;
 using Contacts.Application.ProcessingServices.Models.Responses.HrmPro;
 using Contacts.Domain.PhoneNumbers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Contacts.Infrastructure.ProcessingServices;
 
 internal class HrmProcessingService(IBaseService<PhoneNumber, Guid> phoneNumberService,
-    IPositionChangingNotifier notifier) : IHrmProcessingService
+    IPositionChangingNotifier notifier,
+    ILogger<HrmProcessingService> logger) : IHrmProcessingService
 {
     public async Task<List<PositionWithPhoneNumber>> GetPositionWithPhoneNumbers(List<Position> positions, CancellationToken cancellationToken = default)
     {
@@ -87,7 +89,19 @@ internal class HrmProcessingService(IBaseService<PhoneNumber, Guid> phoneNumberS
                     UserExternalId = worker.Id
                 };
 
-                notifier.Notify(positionChangedMessage);
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        notifier.Notify(positionChangedMessage);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Error occuring while notify position change");
+                    }
+                }, CancellationToken.None);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
 
             var userPhoneNumbers =

@@ -39,27 +39,18 @@ internal class HrmProClient : IHrmProClient
 
         this.client.BaseAddress = new Uri(httpConfiguration.BaseUrl);
     }
-    public async Task<ResponseWrapper<List<Department>>> GetDepartments(string token, int organizationId, CancellationToken cancellationToken = default)
+    public async Task<ResponseWrapper<List<Department>>> GetDepartments(string token,
+                                                                        int organizationId,
+                                                                        CancellationToken cancellationToken = default)
     {
         string key = $"hrm_pro_departments:{organizationId}";
-
-        var stopwatch = Stopwatch.StartNew();
 
         if (cache.TryGetValue(key, out ResponseWrapper<List<Department>>? cachedResponse))
         {
             if (cachedResponse is not null)
             {
-                stopwatch.Stop();
-
-                logger.LogInformation("Cache entry with key {key} served in {elapsedMilliseconds} ms", key, stopwatch.ElapsedMilliseconds);
-
                 return cachedResponse;
             }
-        }
-
-        if (stopwatch.IsRunning)
-        {
-            stopwatch.Stop();
         }
 
         string query = $"?organizations={organizationId}";
