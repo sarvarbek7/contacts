@@ -12,7 +12,10 @@ public static class PhoneNumberMapping
     public static CreatePhoneNumberMessage MapTo(this CreatePhoneNumberRequest request,
         int accountId)
     {
-        return new CreatePhoneNumberMessage(request.Number, accountId);
+        var phoneNumberType = Enum.Parse<PhoneNumberType>(request.Type,
+                                                          ignoreCase: true);
+
+        return new CreatePhoneNumberMessage(request.Number, phoneNumberType, accountId);
     }
 
     public static AssignPositionUserPhoneNumberMessage MapTo(this AssignPhoneNumberToPositionUserRequest request,
@@ -27,7 +30,10 @@ public static class PhoneNumberMapping
 
     public static UpdatePhoneNumberMessage MapTo(this UpdatePhoneNumberRequest request, Guid id, int accountId)
     {
-        return new UpdatePhoneNumberMessage(id, request.Number, accountId);
+        var phoneNumberType = Enum.Parse<PhoneNumberType>(request.Type,
+                                                          ignoreCase: true);
+
+        return new UpdatePhoneNumberMessage(id, request.Number, phoneNumberType, accountId);
     }
 
     public static SearchPhoneNumbersByUserMessage MapTo(this ListPhoneNumbersByUserQuery query)
@@ -84,6 +90,7 @@ public static class PhoneNumberMapping
          {
              Id = x.Id,
              Number = x.Number,
+             Type = x.Type.ToString(),
              AssignedUser = UserMapping.UserDomainToListItem!.Invoke(x.AssignedUser),
          };
 

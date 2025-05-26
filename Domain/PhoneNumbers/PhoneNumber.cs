@@ -11,7 +11,9 @@ public class PhoneNumber : IEntity<Guid>,
 {
     public Guid Id { get; init; }
     public required string Number { get; set; }
-    public int? ActiveAssignedOrganizationId {get; set; }
+    public string TypeString => Type.ToString().ToLower();
+    public required PhoneNumberType Type { get; set; }
+    public int? ActiveAssignedOrganizationId { get; set; }
     public int? ActiveAssignedUserId { get; set; }
     public User? ActiveAssignedUser { get; set; }
     public int? ActiveAssignedPositionId { get; set; }

@@ -16,7 +16,8 @@ public static class PositionsWithNumberEndpoint
     }
 
     static async Task<Ok<ResponseWrapper<HrmListResponse<PositionWithPhoneNumber>>>> Handler([FromServices] IHrmHandler handler,
-                                                 HttpContext httpContext)
+                                                                                             [AsParameters] Contracts.Hrm.ListPositionsQuery query,
+                                                                                             HttpContext httpContext)
     {
         var positions = await handler.GetPositionsWithPhoneNumbers(httpContext.Request.QueryString.Value
             ?? "", httpContext.RequestAborted);

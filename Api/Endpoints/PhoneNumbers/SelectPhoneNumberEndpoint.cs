@@ -42,8 +42,9 @@ public static class SelectPhoneNumberEndpoint
 
         queryable = queryable.Paged(pagination);
 
-        var data = await queryable.Select(x => new SelectPhoneNumber(x.Id, x.Number))
-            .ToListAsync(context.RequestAborted);
+        var data = (await queryable.Select(x => new { x.Id, x.Number, x.Type })
+            .ToListAsync(context.RequestAborted))
+            .Select(x => new  SelectPhoneNumber(x.Id, x.Number, x.Type.ToString().ToLower()));
 
         PageDetail pageDetail = new(pagination, total);
 

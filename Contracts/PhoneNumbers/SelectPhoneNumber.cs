@@ -1,3 +1,3 @@
 namespace Contacts.Contracts.PhoneNumbers;
 
-public record SelectPhoneNumber(Guid Id, string Number);
+public record SelectPhoneNumber(Guid Id, string Number, string Type);

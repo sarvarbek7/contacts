@@ -8,6 +8,9 @@ internal class PhoneNumberConfig : IEntityTypeConfiguration<PhoneNumber>
 {
     public void Configure(EntityTypeBuilder<PhoneNumber> builder)
     {
+        builder.Property(x => x.Type)
+               .HasDefaultValue(PhoneNumberType.Railway);
+
         builder.HasMany(x => x.UsersHistory)
             .WithOne(h => h.PhoneNumber)
             .HasForeignKey(h => h.PhoneNumberId)

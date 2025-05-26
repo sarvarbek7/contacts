@@ -9,7 +9,7 @@ internal class PhoneNumberValidator : BaseValidator<PhoneNumber, Guid>, IValidat
 {
     public new ErrorOr<Created> ValidateOnAdd(PhoneNumber model)
     {
-        var validateNumber = ValidateNumberField(model.Number);
+        var validateNumber = ValidateNumberField(model);
 
         List<Error> errors = [];
 
@@ -33,7 +33,7 @@ internal class PhoneNumberValidator : BaseValidator<PhoneNumber, Guid>, IValidat
 
     public new ErrorOr<Updated> ValidateOnUpdate(PhoneNumber model)
     {
-        var validateNumber = ValidateNumberField(model.Number);
+        var validateNumber = ValidateNumberField(model);
 
         List<Error> errors = [];
 
@@ -50,16 +50,40 @@ internal class PhoneNumberValidator : BaseValidator<PhoneNumber, Guid>, IValidat
         return base.ValidateOnUpdate(model);
     }
 
-    private static ErrorOr<Success> ValidateNumberField(string number)
+    private static ErrorOr<Success> ValidateNumberField(PhoneNumber phoneNumber)
     {
-        if (number is { Length: 5 } validLengthNumber)
+        if (phoneNumber.Type is PhoneNumberType.Railway)
         {
-            if (validLengthNumber.All(char.IsNumber))
+            if (phoneNumber.Number is { Length: 5 } validLengthRailwayNumber)
             {
-                return new Success();
+                if (validLengthRailwayNumber.All(char.IsNumber))
+                {
+                    return new Success();
+                }
             }
-        }
 
-        return ApplicationErrors.InvalidPhoneNumber;
+            return ApplicationErrors.InvalidRailwayPhoneNumber;
+        }
+        else if (phoneNumber.Type is PhoneNumberType.City)
+        {
+            if (phoneNumber.Number is { Length: 9 } validLengthRailwayNumber)
+            {
+                if (validLengthRailwayNumber.All(char.IsNumber))
+                {
+                    int code = int.Parse(validLengthRailwayNumber[..2]);
+
+                    if (code is > 60 and < 80)
+                    {
+                        return new Success();
+                    }
+                }
+            }
+
+            return ApplicationErrors.InvalidCityPhoneNumber;
+        }
+        else
+        {
+            return ApplicationErrors.InvalidRailwayPhoneNumber;
+        }
     }
 }

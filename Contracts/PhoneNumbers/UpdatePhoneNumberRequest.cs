@@ -1,3 +1,3 @@
 namespace Contacts.Contracts.PhoneNumbers;
 
-public record UpdatePhoneNumberRequest(string Number);
+public record UpdatePhoneNumberRequest(string Number, string Type);

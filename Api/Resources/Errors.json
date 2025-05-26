@@ -17,11 +17,17 @@
     "en": "The phone number already exists in the system.",
     "kril": "Телефон рақам тизимда мавжуд."
   },
-  "ApplicationErrors.InvalidPhoneNumber": {
-    "uz": "Telefon nomer formati xato. Iltimos to'g'irlab, qayta urinib ko'ring.",
-    "ru": "Неверный формат номера телефона. Пожалуйста, исправьте и попробуйте снова.",
-    "en": "Invalid phone number format. Please correct it and try again.",
-    "kril": "Телефон номер формати хато. Илтимос тўғирлаб, қайта уриниб кўринг."
+  "ApplicationErrors.InvalidRailwayPhoneNumber": {
+    "uz": "Telefon nomer formati xato. Iltimos to'g'irlab, qayta urinib ko'ring. (00001)",
+    "ru": "Неверный формат номера телефона. Пожалуйста, исправьте и попробуйте снова. (00001)",
+    "en": "Invalid phone number format. Please correct it and try again. (00001)",
+    "kril": "Телефон номер формати хато. Илтимос тўғирлаб, қайта уриниб кўринг. (00001)"
+  },
+  "ApplicationErrors.InvalidCityPhoneNumber": {
+    "uz": "Shahar telefon nomer formati xato. Iltimos to'g'irlab, qayta urinib ko'ring. (711234567)",
+    "ru": "Формат городского телефонного номера неверный. Пожалуйста, исправьте и попробуйте снова. (711234567)",
+    "en": "The city phone number format is invalid. Please correct it and try again. (711234567)",
+    "kril": "Шаҳар телефон рақами формати хато. Илтимос, тўғрилаш ва яна уриниб кўринг. (711234567)"
   },
   "ApplicationErrors.AccountExists": {
     "uz": "Tizimdan ushbu login orqali foydalanuvchi ro'yhatga olingan.",

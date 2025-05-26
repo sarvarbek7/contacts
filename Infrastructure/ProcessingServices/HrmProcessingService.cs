@@ -37,7 +37,8 @@ internal class HrmProcessingService(IBaseService<PhoneNumber, Guid> phoneNumberS
                 .Select(x => new PhoneNumberItem()
                 {
                     Id = x.Id,
-                    Number = x.Number
+                    Number = x.Number,
+                    Type = x.TypeString
                 }).ToList();
 
             PositionWithPhoneNumber positionWithPhoneNumber = new()
@@ -110,6 +111,7 @@ internal class HrmProcessingService(IBaseService<PhoneNumber, Guid> phoneNumberS
                 {
                     Id = x.Id,
                     Number = x.Number,
+                    Type = x.TypeString
                 }).ToList();
 
             WorkerWithPhoneNumber workerWithPhoneNumber = new()
@@ -166,6 +168,7 @@ internal class HrmProcessingService(IBaseService<PhoneNumber, Guid> phoneNumberS
                 {
                     Id = x.Id,
                     Number = x.Number,
+                    Type = x.TypeString
                 }).ToList();
 
             WorkerWithPhoneNumber workerWithPhoneNumber = new()

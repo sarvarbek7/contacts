@@ -277,6 +277,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
             var phoneNumberWithPosition = new PhoneNumberListItemWithPosition(phoneNumber.Id,
                                                                               phoneNumber.Number,
+                                                                              phoneNumber.Type.ToString(),
                                                                               worker,
                                                                               position);
             if (userFilter && worker is null)
@@ -318,6 +319,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
         return await errorOrStoredPhoneNumber.MatchAsync<ErrorOr<Updated>>(async v =>
             {
                 v.Number = message.Number;
+                v.Type = message.Type;
                 v.UpdatedById = message.UserAccountIdWhoDoesAction;
                 v.UpdatedAt = DateTime.UtcNow;
 

@@ -10,13 +10,14 @@ public static class ApplicationErrors
 
     public static Error UserNotFoundInHRMSystem => Error.Validation($"{errorPrefix}.UserNotFoundInHRMSystem");
     public static Error PhoneNumberAlreadyExists => Error.Conflict($"{errorPrefix}.PhoneNumberAlreadyExists");
-    public static Error InvalidPhoneNumber => Error.Validation($"{errorPrefix}.InvalidPhoneNumber");
+    public static Error InvalidRailwayPhoneNumber => Error.Validation($"{errorPrefix}.InvalidRailwayPhoneNumber");
+    public static Error InvalidCityPhoneNumber => Error.Validation($"{errorPrefix}.InvalidCityPhoneNumber");
 
     public static Error AccountExists => Error.Conflict($"{errorPrefix}.AccountExists");
 
-    public static Error InvalidCredentials { get; set; }
-    public static Error InvalidPassword { get; set; }
-    public static Error NumberAlreadyAssignedToUser { get; set; }
-    public static Error PhoneNumberNotAssignedToPosition { get; set; }
-    public static Error InvalidUserExternalId { get; internal set; }
+    public static Error InvalidCredentials => Error.Unauthorized($"{errorPrefix}.InvalidCredentials");
+    public static Error InvalidPassword => Error.Validation($"{errorPrefix}.InvalidPassword");
+    public static Error NumberAlreadyAssignedToUser => Error.Conflict($"{errorPrefix}.NumberAlreadyAssignedToUser");
+    public static Error PhoneNumberNotAssignedToPosition => Error.Validation($"{errorPrefix}.PhoneNumberNotAssignedToPosition");
+    public static Error InvalidUserExternalId => Error.Validation($"{errorPrefix}.InvalidUserExternalId");
 }
