@@ -14,8 +14,8 @@ public static class DepartmentsEndpoint
     }
 
     static async Task<Ok<ResponseWrapper<List<Department>>>> Handler([FromServices] IHrmProClient httpClient,
-    [FromQuery] int organizations,
-                                                 HttpContext httpContext)
+                                                                     [FromQuery] int organizations,
+                                                                     HttpContext httpContext)
     {
         var cancellationToken = httpContext.RequestAborted;
 
