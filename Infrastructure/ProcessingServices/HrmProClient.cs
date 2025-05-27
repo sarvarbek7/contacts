@@ -1,7 +1,7 @@
-using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text;
+using Application.ProcessingServices;
 using Contacts.Application.Common.Exceptions;
 using Contacts.Application.Common.Settings;
 using Contacts.Application.ProcessingServices;
@@ -21,12 +21,14 @@ internal class HrmProClient : IHrmProClient
     private readonly HttpConfiguration httpConfiguration;
     private readonly IConfiguration configuration;
     private readonly ILogger<HrmProClient> logger;
+    private readonly ITranslationService translationService;
 
     public HrmProClient(HttpClient client,
                         IMemoryCache cache,
                         IOptions<List<HttpConfiguration>> options,
                         ILogger<HrmProClient> logger,
-                        IConfiguration configuration)
+                        IConfiguration configuration,
+                        ITranslationService translationService)
     {
         this.cache = cache;
         this.configuration = configuration;
@@ -38,6 +40,7 @@ internal class HrmProClient : IHrmProClient
         this.client = client;
 
         this.client.BaseAddress = new Uri(httpConfiguration.BaseUrl);
+        this.translationService = translationService;
     }
     public async Task<ResponseWrapper<List<Department>>> GetDepartments(string token,
                                                                         int organizationId,
@@ -93,7 +96,9 @@ internal class HrmProClient : IHrmProClient
         throw new NotImplementedException();
     }
 
-    public async Task<ResponseWrapper<HrmListResponse<Position>>> GetPositions(string token, ListPositionsQuery query, CancellationToken cancellationToken = default)
+    public async Task<ResponseWrapper<HrmListResponse<Position>>> GetPositions(string token,
+                                                                               ListPositionsQuery query,
+                                                                               CancellationToken cancellationToken = default)
     {
         string key = $"hrm_pro_positions:{query.OrganizationId}";
 
@@ -101,7 +106,7 @@ internal class HrmProClient : IHrmProClient
 
         var path = endpoint.Path;
 
-        var pathWithQuery = path + query.GetQueryString();
+        var pathWithQuery = path + query.GetQueryString(translationService);
 
         var request = new HttpRequestMessage()
         {

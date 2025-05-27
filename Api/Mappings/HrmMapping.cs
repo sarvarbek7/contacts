@@ -8,6 +8,7 @@ public static class HrmMapping
     {
         return new(query.OrganizationId,
                    query.DepartmentId,
+                   query.Search,
                    query.PerPage,
                    query.Page);
     }

@@ -22,6 +22,8 @@ public static class ListPhoneNumbersForPositionClientEndpoint
 
         var workers =  await phoneNumberHandler.HandlePositionPhoneNumbersClient(message, httpContext.RequestAborted);
 
+        workers.ForEach(x => x.Worker.HideNumber());
+
         return TypedResults.Ok(workers);
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Mappings;
 using Contacts.Application.Handlers.Responses;
 using Contacts.Contracts.PhoneNumbers;
+using LinqKit;
 
 namespace Contacts.Api.Endpoints.PhoneNumbers;
 
@@ -22,6 +23,8 @@ public static class ListPhoneNumbersEndpoint
         var message = query.MapTo();
 
         var result = await phoneNumberHandler.HandleList(message, httpContext.RequestAborted);
+
+        result.Data?.ForEach(x => x.AssignedUser?.Worker.HideNumber());
 
         var response = (result.Data ?? []).ToListResponse(result.PageDetail);
 

@@ -20,6 +20,8 @@ public static class WorkersWithPhoneNumberEndpoint
 
         var workers = await handler.GetWorkersWithPhoneNumbers(httpContext.Request.QueryString.Value ?? "", cancellationToken);
 
+        workers.Data.Data.ForEach(x => x.Worker.HideNumber());
+
         return TypedResults.Ok(workers);
     }
 }
