@@ -198,6 +198,42 @@ internal class HrmProClient : IHrmProClient
         throw new NotImplementedException();
     }
 
+    public async Task<ResponseWrapper<HrmListResponse<DepartmentSearchItem>>> GetSearchDepartments(string token, string query, CancellationToken cancellationToken = default)
+    {
+        // TODO department search
+        var endpoint = httpConfiguration.Endpoints.Single(x => x.Name == HttpEndpoint.HrmPro_DepartmentsSearch);
+
+        string path = endpoint.Path;
+
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            path += query;
+        }
+
+        var request = new HttpRequestMessage()
+        {
+            RequestUri = new Uri(client.BaseAddress!, path),
+            Method = HttpMethod.Parse(endpoint.Method)
+        };
+
+        request.Headers.TryAddWithoutValidation("Authorization", token);
+
+        var response = await client.SendAsync(request,
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var departments = await
+                response.Content.ReadFromJsonAsync<ResponseWrapper<HrmListResponse<DepartmentSearchItem>>>(cancellationToken);
+
+
+            return departments!;
+        }
+
+
+        throw new NotImplementedException();
+    }
+
     public async Task<ResponseWrapper<List<Organization>>> GetStructure(string token, CancellationToken cancellationToken = default)
     {
         const string key = "hrm_pro_structure";

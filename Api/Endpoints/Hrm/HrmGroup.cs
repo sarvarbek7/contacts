@@ -12,6 +12,7 @@ public static class HrmGroup
         hrm.MapPositionsWithNumber();
         hrm.MapWorkers();
         hrm.MapWorkersWithNumber();
+        hrm.MapGetAllDepartments();
 
         return hrm;
     }

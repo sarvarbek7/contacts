@@ -11,6 +11,7 @@ public record HttpEndpoint
     public const string HrmPro_Department = "departments";
     public const string HrmPro_Positions = "positions";
     public const string HrmPro_Workers = "workers";
+    public const string HrmPro_DepartmentsSearch = "get-departments";
 
     public required string Name { get; init; }
     public required string Path { get; init; }
