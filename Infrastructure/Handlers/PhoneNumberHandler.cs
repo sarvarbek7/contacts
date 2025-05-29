@@ -383,27 +383,32 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
         int page = 1;
         int perPage = 100;
 
-        string query = $"?organization_id={message.OrganizationId}&department_position_id={message.PositionId}&per_page={perPage}";
+        string query = $"?organization_id={message.OrganizationId}&per_page={perPage}";
+
+        if (message.PositionId.HasValue)
+        {
+            query += $"&department_position_id={message.PositionId}";
+        }
 
         while (hasWorker)
-        {
-            string queryWithPage = query + $"&page={page}";
-
-            var response = await hrmClient.GetWorkers(login.TokenValue, queryWithPage, cancellationToken);
-
-            var listResponse = response.Data;
-
-            if (listResponse.Total > page * perPage)
             {
-                page++;
-            }
-            else
-            {
-                hasWorker = false;
-            }
+                string queryWithPage = query + $"&page={page}";
 
-            workers.AddRange(listResponse.Data);
-        }
+                var response = await hrmClient.GetWorkers(login.TokenValue, queryWithPage, cancellationToken);
+
+                var listResponse = response.Data;
+
+                if (listResponse.Total > page * perPage)
+                {
+                    page++;
+                }
+                else
+                {
+                    hasWorker = false;
+                }
+
+                workers.AddRange(listResponse.Data);
+            }
 
         var workerIds = workers.Select(x => x.Id).ToList();
 
@@ -484,27 +489,32 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
         int page = 1;
         int perPage = 100;
 
-        string query = $"?organization_id={message.OrganizationId}&department_position_id={message.PositionId}&per_page={perPage}";
+        string query = $"?organization_id={message.OrganizationId}&per_page={perPage}";
+
+        if (message.PositionId.HasValue)
+        {
+            query += $"&department_position_id={message.PositionId}";
+        }
 
         while (hasWorker)
-        {
-            string queryWithPage = query + $"&page={page}";
-
-            var response = await hrmClient.GetWorkers(login.TokenValue, queryWithPage, cancellationToken);
-
-            var listResponse = response.Data;
-
-            if (listResponse.Total > page * perPage)
             {
-                page++;
-            }
-            else
-            {
-                hasWorker = false;
-            }
+                string queryWithPage = query + $"&page={page}";
 
-            workers.AddRange(listResponse.Data);
-        }
+                var response = await hrmClient.GetWorkers(login.TokenValue, queryWithPage, cancellationToken);
+
+                var listResponse = response.Data;
+
+                if (listResponse.Total > page * perPage)
+                {
+                    page++;
+                }
+                else
+                {
+                    hasWorker = false;
+                }
+
+                workers.AddRange(listResponse.Data);
+            }
 
         var workerIds = workers.Select(x => x.Id).ToList();
 

@@ -27,9 +27,11 @@ public class PositionChangingReceiver(IServiceProvider serviceProvider,
 
         var phoneNumberRepository = scope.ServiceProvider.GetRequiredService<IRepository<PhoneNumber, Guid>>();
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         var query = phoneNumberRepository.GetAll(x => x.ActiveAssignedPositionUser.ExternalId == value.UserExternalId &&
                                                       x.ActiveAssignedPositionId == value.PositionId,
                                                 tracked: false);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
         int? activeAssignPositionUserId = null;
 
