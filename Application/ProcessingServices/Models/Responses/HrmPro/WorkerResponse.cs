@@ -18,4 +18,7 @@ public record WorkerResponse
 
     [JsonPropertyName("worker")]
     public required Worker Worker { get; init; }
+
+    [JsonPropertyName("post_name")]
+    public string PostName { get; init; } = string.Empty;
 }
