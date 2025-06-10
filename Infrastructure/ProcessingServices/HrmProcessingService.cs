@@ -114,15 +114,7 @@ internal class HrmProcessingService(IBaseService<PhoneNumber, Guid> phoneNumberS
                     Type = x.TypeString
                 }).ToList();
 
-            WorkerWithPhoneNumber workerWithPhoneNumber = new()
-            {
-                Id = worker.Id,
-                Organization = worker.Organization,
-                Department = worker.Department,
-                DepartmentPosition = worker.DepartmentPosition,
-                Worker = worker.Worker,
-                PhoneNumbers = userPhoneNumbers,
-            };
+            var workerWithPhoneNumber = WorkerWithPhoneNumber.MapFrom(worker, userPhoneNumbers);
 
             workerWithPhoneNumbers.Add(workerWithPhoneNumber);
         }
@@ -171,15 +163,7 @@ internal class HrmProcessingService(IBaseService<PhoneNumber, Guid> phoneNumberS
                     Type = x.TypeString
                 }).ToList();
 
-            WorkerWithPhoneNumber workerWithPhoneNumber = new()
-            {
-                Id = worker.Id,
-                Organization = worker.Organization,
-                Department = worker.Department,
-                DepartmentPosition = worker.DepartmentPosition,
-                Worker = worker.Worker,
-                PhoneNumbers = userPhoneNumbers,
-            };
+            var workerWithPhoneNumber = WorkerWithPhoneNumber.MapFrom(worker, userPhoneNumbers);
 
             if (workerWithPhoneNumber.PhoneNumbers.Count > 0)
             {
