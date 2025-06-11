@@ -18,10 +18,10 @@
     "kril": "Телефон рақам тизимда мавжуд."
   },
   "ApplicationErrors.InvalidRailwayPhoneNumber": {
-    "uz": "Telefon nomer formati xato. Iltimos to'g'irlab, qayta urinib ko'ring. (00001)",
-    "ru": "Неверный формат номера телефона. Пожалуйста, исправьте и попробуйте снова. (00001)",
-    "en": "Invalid phone number format. Please correct it and try again. (00001)",
-    "kril": "Телефон номер формати хато. Илтимос тўғирлаб, қайта уриниб кўринг. (00001)"
+    "uz": "Telefon nomer formati xato. Iltimos to'g'irlab, qayta urinib ko'ring. (0001 yoki 00001)",
+    "ru": "Неверный формат номера телефона. Пожалуйста, исправьте и попробуйте снова. (0001 или 00001)",
+    "en": "Invalid phone number format. Please correct it and try again. (0001 or 00001)",
+    "kril": "Телефон номер формати хато. Илтимос тўғирлаб, қайта уриниб кўринг. (0001 ёки 00001)"
   },
   "ApplicationErrors.InvalidCityPhoneNumber": {
     "uz": "Shahar telefon nomer formati xato. Iltimos to'g'irlab, qayta urinib ko'ring. (711234567)",

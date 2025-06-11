@@ -54,7 +54,7 @@ internal class PhoneNumberValidator : BaseValidator<PhoneNumber, Guid>, IValidat
     {
         if (phoneNumber.Type is PhoneNumberType.Railway)
         {
-            if (phoneNumber.Number is { Length: 5 } validLengthRailwayNumber)
+            if (phoneNumber.Number is { Length: 4 or 5 } validLengthRailwayNumber)
             {
                 if (validLengthRailwayNumber.All(char.IsNumber))
                 {

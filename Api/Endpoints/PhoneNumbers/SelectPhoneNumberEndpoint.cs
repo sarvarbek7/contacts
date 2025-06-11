@@ -1,6 +1,7 @@
 using Application.Common;
 using Application.Common.Extensions;
 using Application.Services.Foundations;
+using Contacts.Api.Mappings;
 using Contacts.Application.Handlers.Interfaces;
 using Contacts.Contracts.PhoneNumbers;
 using Contracts.Common;
@@ -42,9 +43,12 @@ public static class SelectPhoneNumberEndpoint
 
         queryable = queryable.Paged(pagination);
 
-        var data = (await queryable.Select(x => new { x.Id, x.Number, x.Type })
+        var data = (await queryable.Select(x => new { x.Id, x.Number, x.Type, x.ActiveAssignedPositionUser })
             .ToListAsync(context.RequestAborted))
-            .Select(x => new  SelectPhoneNumber(x.Id, x.Number, x.Type.ToString().ToLower()));
+            .Select(x => new  SelectPhoneNumber(x.Id,
+                                                x.Number,
+                                                x.Type.ToString().ToLower(),
+                                                x.ActiveAssignedPositionUser is null ? null : UserMapping.UserDomainToListItem.Compile().Invoke(x.ActiveAssignedPositionUser)));
 
         PageDetail pageDetail = new(pagination, total);
 
