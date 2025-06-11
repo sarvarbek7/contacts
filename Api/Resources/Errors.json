@@ -9,7 +9,7 @@
     "uz": "Xodim ma'lumotlari Exodim tizimidan topilmadi.",
     "ru": "Данные сотрудника не найдены в системе Exodim.",
     "en": "Employee data not found in the Exodim system.",
-    "kril": "Ходим маълумотлари Эхдим тизимидан топилмади."
+    "kril": "Ходим маълумотлари Эходим тизимидан топилмади."
   },
   "ApplicationErrors.PhoneNumberAlreadyExists": {
     "uz": "Telefon raqam tizimda mavjud.",
