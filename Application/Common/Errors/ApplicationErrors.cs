@@ -20,4 +20,5 @@ public static class ApplicationErrors
     public static Error NumberAlreadyAssignedToUser => Error.Conflict($"{errorPrefix}.NumberAlreadyAssignedToUser");
     public static Error PhoneNumberNotAssignedToPosition => Error.Validation($"{errorPrefix}.PhoneNumberNotAssignedToPosition");
     public static Error InvalidUserExternalId => Error.Validation($"{errorPrefix}.InvalidUserExternalId");
+    public static Error HandbookItemNotFound => Error.Validation($"{errorPrefix}.HandbookItemNotFound");
 }

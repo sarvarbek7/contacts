@@ -7,4 +7,5 @@ public static class Tags
     public const string HRM = "HRM";
     public const string Auth = "Auth";
     public const string Accounts = "Accounts";
+    public const string Handbooks = "Handbooks";
 }

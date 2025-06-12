@@ -3,6 +3,7 @@ using System;
 using Contacts.Infrastructure.Persistance;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Contacts.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250611105314_AddHandbooks")]
+    partial class AddHandbooks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,39 +102,15 @@ namespace Contacts.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
                     b.HasKey("Id")
                         .HasName("pk_handbook");
 
                     b.ToTable("handbook", (string)null);
-                });
-
-            modelBuilder.Entity("Contacts.Domain.Handbook.HandbookItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("HandbookId")
-                        .HasColumnType("integer")
-                        .HasColumnName("handbook_id");
-
-                    b.Property<Guid>("PhoneNumberId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("phone_number_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_handbook_item");
-
-                    b.HasIndex("HandbookId")
-                        .HasDatabaseName("ix_handbook_item_handbook_id");
-
-                    b.HasIndex("PhoneNumberId")
-                        .HasDatabaseName("ix_handbook_item_phone_number_id");
-
-                    b.ToTable("handbook_item", (string)null);
                 });
 
             modelBuilder.Entity("Contacts.Domain.PhoneNumbers.PhoneNumber", b =>
@@ -468,86 +447,44 @@ namespace Contacts.Infrastructure.Migrations
 
             modelBuilder.Entity("Contacts.Domain.Handbook.Handbook", b =>
                 {
-                    b.OwnsMany("Contacts.Domain.Handbook.HandbookTranslation", "Translations", b1 =>
+                    b.OwnsMany("Contacts.Domain.Handbook.HandbookItem", "Items", b1 =>
                         {
                             b1.Property<int>("HandbookId")
                                 .HasColumnType("integer")
                                 .HasColumnName("handbook_id");
 
-                            b1.Property<int>("Language")
-                                .HasColumnType("integer")
-                                .HasColumnName("language");
-
-                            b1.Property<bool>("IsDefault")
-                                .HasColumnType("boolean")
-                                .HasColumnName("is_default");
-
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("name");
-
-                            b1.HasKey("HandbookId", "Language")
-                                .HasName("pk_handbook_translation");
-
-                            b1.ToTable("handbook_translation", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("HandbookId")
-                                .HasConstraintName("fk_handbook_translation_handbook_handbook_id");
-                        });
-
-                    b.Navigation("Translations");
-                });
-
-            modelBuilder.Entity("Contacts.Domain.Handbook.HandbookItem", b =>
-                {
-                    b.HasOne("Contacts.Domain.Handbook.Handbook", null)
-                        .WithMany("Items")
-                        .HasForeignKey("HandbookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_handbook_item_handbook_handbook_id");
-
-                    b.HasOne("Contacts.Domain.PhoneNumbers.PhoneNumber", "PhoneNumber")
-                        .WithMany()
-                        .HasForeignKey("PhoneNumberId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_handbook_item_phone_number_phone_number_id");
-
-                    b.OwnsMany("Contacts.Domain.Handbook.HandbookItemTranslation", "Translations", b1 =>
-                        {
-                            b1.Property<int>("HandbookItemId")
-                                .HasColumnType("integer")
-                                .HasColumnName("handbook_item_id");
-
-                            b1.Property<int>("Language")
-                                .HasColumnType("integer")
-                                .HasColumnName("language");
+                            b1.Property<Guid>("PhoneNumberId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("phone_number_id");
 
                             b1.Property<string>("Alias")
                                 .IsRequired()
                                 .HasColumnType("text")
                                 .HasColumnName("alias");
 
-                            b1.Property<bool>("IsDefault")
-                                .HasColumnType("boolean")
-                                .HasColumnName("is_default");
+                            b1.HasKey("HandbookId", "PhoneNumberId")
+                                .HasName("pk_handbook_item");
 
-                            b1.HasKey("HandbookItemId", "Language")
-                                .HasName("pk_handbook_item_translation");
+                            b1.HasIndex("PhoneNumberId")
+                                .HasDatabaseName("ix_handbook_item_phone_number_id");
 
-                            b1.ToTable("handbook_item_translation", (string)null);
+                            b1.ToTable("handbook_item", (string)null);
 
                             b1.WithOwner()
-                                .HasForeignKey("HandbookItemId")
-                                .HasConstraintName("fk_handbook_item_translation_handbook_item_handbook_item_id");
+                                .HasForeignKey("HandbookId")
+                                .HasConstraintName("fk_handbook_item_handbook_handbook_id");
+
+                            b1.HasOne("Contacts.Domain.PhoneNumbers.PhoneNumber", "PhoneNumber")
+                                .WithMany()
+                                .HasForeignKey("PhoneNumberId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired()
+                                .HasConstraintName("fk_handbook_item_phone_number_phone_number_id");
+
+                            b1.Navigation("PhoneNumber");
                         });
 
-                    b.Navigation("PhoneNumber");
-
-                    b.Navigation("Translations");
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("Contacts.Domain.PhoneNumbers.PhoneNumber", b =>
@@ -691,11 +628,6 @@ namespace Contacts.Infrastructure.Migrations
                         .HasConstraintName("fk_user_account_account_id");
 
                     b.Navigation("Account");
-                });
-
-            modelBuilder.Entity("Contacts.Domain.Handbook.Handbook", b =>
-                {
-                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("Contacts.Domain.PhoneNumbers.PhoneNumber", b =>

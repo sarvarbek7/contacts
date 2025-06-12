@@ -64,5 +64,6 @@ public static class DependencyInjection
         services.AddScoped<IAccountHandler, AccountHandler>();
         services.AddScoped<IAuthHandler, AuthHandler>();
         services.AddScoped<IHrmHandler, HrmHandler>();
+        services.AddScoped<IHandbookHandler, HandbookHandler>();
     }
 }

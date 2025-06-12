@@ -13,7 +13,7 @@ public class ListResult<TData>
         PageDetail = new PageDetail(pagination, recordsCount);
     }
 
-    internal static ListResult<TData> FromQueryable(IQueryable<TData> query,
+    public static ListResult<TData> FromQueryable(IQueryable<TData> query,
                                               Pagination pagination,
                                               int recordsCount)
     {
@@ -23,7 +23,7 @@ public class ListResult<TData>
         };
     }
 
-    internal static ListResult<TData> FromCollection(ICollection<TData> data,
+    public static ListResult<TData> FromCollection(ICollection<TData> data,
                                               Pagination pagination,
                                               int recordsCount)
     {

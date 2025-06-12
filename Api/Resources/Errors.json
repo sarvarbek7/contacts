@@ -64,5 +64,11 @@
     "ru": "Введенные данные неверны.",
     "en": "The entered data is incorrect.",
     "kril": "Киритилган маълумот хато."
+  },
+  "ApplicationErrors.HandbookItemNotFound": {
+    "uz": "",
+    "ru": "",
+    "en": "",
+    "kril": ""
   }
 }

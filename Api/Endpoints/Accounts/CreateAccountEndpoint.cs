@@ -14,7 +14,7 @@ public static class CreateAccountEndpoint
         return route.MapPost(Routes.CreateAccount, Handler);
     }
 
-    [Authorize(Roles = "SuperAdmin")]
+    [Authorize(Roles = AppRoles.SuperAdmin)]
     private static async Task Handler([FromBody] CreateAccountRequest request,
                                 [FromServices] IAccountHandler authHandler,
                                 HttpContext context)

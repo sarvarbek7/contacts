@@ -1,4 +1,5 @@
 using Contacts.Domain.Accounts;
+using Contacts.Domain.Handbook;
 using Infrastructure.Persistance;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -31,6 +32,7 @@ internal class AppDbContext(DbContextOptions<AppDbContext> options,
 
         modelBuilder.ApplyConfigurationsFromAssembly(assembly);
 
+        modelBuilder.AddTranslationConfig();
         modelBuilder.AddIsDeletedQueryFilters();
         modelBuilder.AddCreatedAuditableForeignKey<Account, int>();
         modelBuilder.AddUpdatedAuditableForeignKey<Account, int>();

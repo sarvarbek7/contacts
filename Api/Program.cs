@@ -14,6 +14,7 @@ using Api;
 using System.Text.Json;
 using Shared;
 using Contacts.Application.ProcessingServices;
+using Contacts.Api.Endpoints.Handbooks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -94,6 +95,7 @@ api.MapHrm();
 api.MapUsers();
 api.MapAuth();
 api.MapAccounts();
+api.MapHandbooks();
 
 app.Run();
 
