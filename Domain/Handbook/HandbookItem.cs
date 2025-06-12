@@ -7,7 +7,6 @@ public class HandbookItem : IEntity<int>, ITranslatable<HandbookItem, HandbookIt
 {
     public int Id { get; init; }
     public int HandbookId { get; set; }
-    public Guid PhoneNumberId { get; set; }
-    public PhoneNumber? PhoneNumber { get; set; }
+    public required string Number { get; set; }
     public List<HandbookItemTranslation> Translations { get; set; } = [];
 }

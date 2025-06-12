@@ -597,5 +597,41 @@ BEGIN
     VALUES ('20250612100000_AddTranslations', '9.0.4');
     END IF;
 END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM ef_migrations WHERE "migration_id" = '20250612103634_RemovePhoneNumberHnadbookItemRel') THEN
+    ALTER TABLE handbook_item DROP CONSTRAINT fk_handbook_item_phone_number_phone_number_id;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM ef_migrations WHERE "migration_id" = '20250612103634_RemovePhoneNumberHnadbookItemRel') THEN
+    DROP INDEX ix_handbook_item_phone_number_id;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM ef_migrations WHERE "migration_id" = '20250612103634_RemovePhoneNumberHnadbookItemRel') THEN
+    ALTER TABLE handbook_item DROP COLUMN phone_number_id;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM ef_migrations WHERE "migration_id" = '20250612103634_RemovePhoneNumberHnadbookItemRel') THEN
+    ALTER TABLE handbook_item ADD number text NOT NULL DEFAULT '';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM ef_migrations WHERE "migration_id" = '20250612103634_RemovePhoneNumberHnadbookItemRel') THEN
+    INSERT INTO ef_migrations (migration_id, product_version)
+    VALUES ('20250612103634_RemovePhoneNumberHnadbookItemRel', '9.0.4');
+    END IF;
+END $EF$;
 COMMIT;
 

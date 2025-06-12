@@ -1,3 +1,3 @@
 namespace Contacts.Contracts.Handbooks;
 
-public record UpdateHandbookItemRequest(List<HandbookItemTranslationDto> Translations);
+public record UpdateHandbookItemRequest(string Number, List<HandbookItemTranslationDto> Translations);

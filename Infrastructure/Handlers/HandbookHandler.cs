@@ -5,14 +5,12 @@ using Contacts.Application.Common.Errors;
 using Contacts.Application.Handlers.Interfaces;
 using Contacts.Application.Handlers.Messages.Handbooks;
 using Contacts.Domain.Handbook;
-using Contacts.Domain.PhoneNumbers;
 using ErrorOr;
 using Microsoft.EntityFrameworkCore;
 
 namespace Contacts.Infrastructure.Handlers;
 
-internal class HandbookHandler(IBaseService<Handbook, int> service,
-                               IBaseService<PhoneNumber, Guid> phoneNumberService) : IHandbookHandler
+internal class HandbookHandler(IBaseService<Handbook, int> service) : IHandbookHandler
 {
     public async Task<ErrorOr<Handbook>> HandleCreateHandbook(CreateHandbookMessage message, CancellationToken cancellationToken = default)
     {
@@ -39,16 +37,9 @@ internal class HandbookHandler(IBaseService<Handbook, int> service,
 
         var handleBook = errorOrHandleBook.Value;
 
-        var errorOrPhoneNumber = await phoneNumberService.GetById(message.PhoneNumberId, tracked: true, cancellationToken: cancellationToken);
-
-        if (errorOrPhoneNumber.IsError)
-        {
-            return errorOrPhoneNumber.FirstError;
-        }
-
         var item = new HandbookItem()
         {
-            PhoneNumber = errorOrPhoneNumber.Value,
+            Number = message.Number,
             Translations = message.Translations,
         };
 
@@ -89,7 +80,7 @@ internal class HandbookHandler(IBaseService<Handbook, int> service,
 
         var handbook = errorOrHandleBook.Value;
 
-        var item = handbook.Items.FirstOrDefault(x => x.PhoneNumberId == message.PhoneNumberId);
+        var item = handbook.Items.FirstOrDefault(x => x.Id == message.ItemId);
 
         if (item is null)
         {
@@ -107,7 +98,7 @@ internal class HandbookHandler(IBaseService<Handbook, int> service,
     {
         var errorOrHandleBook = await service.GetById(Id,
                                                       tracked: true,
-                                                      includeStrings: [nameof(Handbook.Items), $"{nameof(Handbook.Items)}.{nameof(HandbookItem.PhoneNumber)}"],
+                                                      includeStrings: [nameof(Handbook.Items)],
                                                       cancellationToken: cancellationToken);
 
         if (errorOrHandleBook.IsError)
@@ -131,8 +122,7 @@ internal class HandbookHandler(IBaseService<Handbook, int> service,
 
         var total = await query.CountAsync(cancellationToken);
 
-        query = query.Include(x => x.Items)
-                     .ThenInclude(i => i.PhoneNumber);
+        query = query.Include(x => x.Items);
 
         query = query.Paged(message.Pagination);
 
@@ -165,7 +155,7 @@ internal class HandbookHandler(IBaseService<Handbook, int> service,
     {
         var errorOrHandleBook = await service.GetById(message.HandbookId,
                                                       tracked: true,
-                                                      includeStrings: [nameof(Handbook.Items), $"{nameof(Handbook.Items)}.{nameof(HandbookItem.PhoneNumber)}"],
+                                                      includeStrings: [nameof(Handbook.Items)],
                                                       cancellationToken: cancellationToken);
 
         if (errorOrHandleBook.IsError)

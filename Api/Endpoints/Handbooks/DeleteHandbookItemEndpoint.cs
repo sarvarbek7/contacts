@@ -12,17 +12,17 @@ public static class DeleteHandbookItemEndpoint
 {
     public static RouteHandlerBuilder MapDeleteHandbookItem(this RouteGroupBuilder route)
     {
-        return route.MapDelete(Routes.Items, Handler);
+        return route.MapDelete(Routes.ItemsWithItemId, Handler);
     }
 
     [Authorize(Roles = $"{AppRoles.Admin}, {AppRoles.SuperAdmin}")]
     private static async Task<Results<Ok, ProblemHttpResult>> Handler([FromRoute] int id,
-                                                                      [FromQuery] Guid phoneNumberId,
+                                                                      [FromRoute] int itemId,
                                                                       [FromServices] IHandbookHandler handler,
                                                                       HttpContext context)
     {
         var message = new DeleteHandbookItemMessage(id,
-                                                    phoneNumberId);
+                                                    itemId);
 
         var result = await handler.HandleDeleteHandbookItem(message,
                                                             context.RequestAborted);

@@ -38,15 +38,15 @@ public static class HandbookMapping
 
     public static CreateHandlebookItemMessage MapTo(this CreateHandbookItemRequest request,
                                                     int id)
-        => new(id, request.PhoneNumberId, [.. request.Translations.Select(x=>x.MapTo())]);
+        => new(id, request.Number, [.. request.Translations.Select(x=>x.MapTo())]);
 
     public static UpdateHandbookItemMessage MapTo(this UpdateHandbookItemRequest request,
                                                   int handbookId,
                                                   int itemId)
-        => new(handbookId, itemId, [.. request.Translations.Select(x=>x.MapTo())]);
+        => new(handbookId, itemId, request.Number, [.. request.Translations.Select(x=>x.MapTo())]);
 
     public static HandbookItemDto MapTo(this HandbookItem item)
-        => new(item.Id, new(item.PhoneNumberId, item.PhoneNumber!.Number), [.. item.Translations.Select(x=>x.MapTo())]);
+        => new(item.Id, item.Number, [.. item.Translations.Select(x=>x.MapTo())]);
 
     public static HandbookDto MapTo(this Handbook handbook)
         => new(handbook.Id, [.. handbook.Translations.Select(x=>x.MapTo())], handbook.Items.Select(x => x.MapTo()));
