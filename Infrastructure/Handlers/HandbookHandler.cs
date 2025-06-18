@@ -71,6 +71,7 @@ internal class HandbookHandler(IBaseService<Handbook, int> service) : IHandbookH
     {
         var errorOrHandleBook = await service.GetById(message.Id,
                                                       tracked: true,
+                                                      includeStrings: [nameof(Handbook.Items)],
                                                       cancellationToken: cancellationToken);
 
         if (errorOrHandleBook.IsError)
