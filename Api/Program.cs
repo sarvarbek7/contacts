@@ -39,7 +39,21 @@ builder.Services.AddOpenApi(options =>
 builder.Services.AddApplication(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
 
-builder.Configuration.AddJsonFile("./appsettings.Production.json", false);
+if (builder.Environment.IsProduction())
+{
+    builder.Configuration.AddJsonFile("./appsettings.Production.json", false);
+}
+
+if (builder.Environment.IsStaging())
+{
+    builder.Configuration.AddJsonFile("./appsettings.Staging.json", false);
+}
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddJsonFile("./appsettings.Development.json", false);
+}
+
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
 
@@ -63,6 +77,7 @@ builder.Services.AddAuthorization();
 var configuration = new LoggerConfiguration()
               .MinimumLevel.Information()
               .WriteTo.Console();
+
 Log.Logger = configuration.CreateLogger();
 
 builder.Services.AddSerilog(Log.Logger);
