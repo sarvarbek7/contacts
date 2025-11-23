@@ -101,8 +101,6 @@ app.UseAuthorization();
 await Seeder.SeedData(app.Services);
 AddErrors(app.Environment.ContentRootPath);
 
-await SubscribePositionChanging(app.Services);
-
 var api = app.MapGroup("api");
 
 api.MapPhoneNumbers();
@@ -124,14 +122,4 @@ static void AddErrors(string contentRootPath)
         ?? throw new InvalidOperationException("Errors json not exitst");
 
     Translation.AddTranslations(errors);
-}
-
-async static Task SubscribePositionChanging(IServiceProvider provider)
-{
-    await using var scope = provider.CreateAsyncScope();
-
-    var notifier = scope.ServiceProvider.GetRequiredService<IPositionChangingNotifier>();
-    var receiver = scope.ServiceProvider.GetRequiredService<IPositionChangingReceiver>();
-
-    notifier.Subscribe(receiver);
 }

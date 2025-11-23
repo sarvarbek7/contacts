@@ -5,5 +5,6 @@ namespace Contacts.Application.Handlers.Responses;
 public record PhoneNumberListItemWithPosition(Guid Id,
                                               string Number,
                                               string Type,
-                                              WorkerResponse? AssignedUser,
-                                              Position? Position);
+                                              List<PositionWrapper> Positions);
+
+public record PositionWrapper(Guid PositionAssignmentId, Position Position, IEnumerable<WorkerResponse> Workers);

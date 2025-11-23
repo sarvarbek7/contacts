@@ -13,15 +13,6 @@ public class PhoneNumber : IEntity<Guid>,
     public required string Number { get; set; }
     public string TypeString => Type.ToString().ToLower();
     public required PhoneNumberType Type { get; set; }
-    public int? ActiveAssignedOrganizationId { get; set; }
-    public int? ActiveAssignedUserId { get; set; }
-    public User? ActiveAssignedUser { get; set; }
-    public int? ActiveAssignedPositionId { get; set; }
-    public int? ActiveAssignedPositionUserId { get; set; }
-    public User? ActiveAssignedPositionUser { get; set; }
-    public List<UserPhoneNumber> UsersHistory { get; set; } = [];
-    public List<PositionUserPhoneNumber> PositionUsersHistory { get; set; } = [];
-    public List<PositionPhoneNumber> PositionHistory { get; set; } = [];
     public DateTime CreatedAt { get; set; }
     public Account? CreatedBy { get; set; }
     public int? CreatedById { get; set; }
@@ -33,101 +24,77 @@ public class PhoneNumber : IEntity<Guid>,
     public int? DeletedById { get; set; }
     public bool IsDeleted { get; set; }
 
-    public void AssignUser(User user, int organizationId, int accountId)
-    {
-        ActiveAssignedUser = user;
-        ActiveAssignedOrganizationId = organizationId;
+    /// <summary>
+    /// Biriktirilgan lavozimlar
+    /// </summary>
+    public List<PositionAssignment> AssignedPositions { get; set; } = [];
 
-        foreach (var history in UsersHistory.Where(x => x.IsActive))
+    /// <summary>
+    /// To'g'ridan to'g'ri biriktirilgan xodim(lavozimidan qat'i nazar)
+    /// </summary>
+    public List<UserAssignment> AssignedUsers { get; set; } = [];
+
+    public void AssignUser(User user, int accountId)
+    {
+        var existingAssignment = AssignedUsers
+            .FirstOrDefault(x => x.UserId == user.Id);
+
+        if (existingAssignment == null)
         {
-            history.IsActive = false;
+            var userAssignment = new UserAssignment()
+            {
+                UserId = user.Id,
+                User = user,
+                PhoneNumber = this,
+                PhoneNumberId = Id,
+                CreatedById = accountId,
+                CreatedAt = DateTime.UtcNow,
+            };
+
+            AssignedUsers.Add(userAssignment);
         }
 
-        var newHistory = new UserPhoneNumber()
-        {
-            CreatedById = accountId,
-            CreatedAt = DateTime.UtcNow,
-            IsActive = true,
-            User = user
-        };
 
-        UsersHistory.Add(newHistory);
     }
 
-    public void UnAssignUser(int accountId)
+    public void UnAssignUser(Guid userAssignmentId, int accountId)
     {
-        ActiveAssignedUserId = null;
-        ActiveAssignedOrganizationId = null;
+        var userAssignment = AssignedUsers
+            .FirstOrDefault(x => x.Id == userAssignmentId);
 
-        foreach (var history in UsersHistory.Where(x => x.IsActive))
+        if (userAssignment != null)
         {
-            history.IsActive = false;
-            history.RemovedAt = DateTime.UtcNow;
-            history.RemovedById = accountId;
-        }
-    }
-
-    public void AssignPositionUser(User user, int accountId)
-    {
-        ActiveAssignedPositionUser = user;
-
-        var history = new PositionUserPhoneNumber()
-        {
-            UserId = user.Id,
-            CreatedById = accountId,
-            CreatedAt = DateTime.UtcNow,
-        };
-
-        PositionUsersHistory.Add(history);
-    }
-
-    public void UnAssignPositionUser(int accountId)
-    {
-        ActiveAssignedPositionUserId = null;
-
-        foreach (var history in UsersHistory.Where(x => x.IsActive))
-        {
-            history.IsActive = false;
-            history.RemovedAt = DateTime.UtcNow;
-            history.RemovedById = accountId;
+            AssignedUsers.Remove(userAssignment);
         }
     }
 
     public void AssignPosition(int positionId,
                                int organizationId,
-                               string organization,
-                               string department,
-                               string position,
+                               int departmentId,
+                               int innerPositionId,
                                int accountId)
     {
-        ActiveAssignedPositionId = positionId;
-        ActiveAssignedOrganizationId = organizationId;
-
-        var positionPhoneHistory = new PositionPhoneNumber()
+        var positionAssignment = new PositionAssignment()
         {
             PositionId = positionId,
-            IsActive = true,
+            OrganizationId = organizationId,
+            DepartmentId = departmentId,
+            InnerPositionId = innerPositionId,
+            PhoneNumber = this,
+            PhoneNumberId = Id,
             CreatedById = accountId,
             CreatedAt = DateTime.UtcNow,
-            Organization = organization,
-            Department = department,
-            Position = position,
         };
 
-        PositionHistory.Add(positionPhoneHistory);
+        AssignedPositions.Add(positionAssignment);
     }
 
-    public void UnAssignPosition(int accountId)
+    public void UnAssignPosition(Guid assignmentId, int accountId)
     {
-        ActiveAssignedPositionId = null;
-        ActiveAssignedPositionUserId = null;
-        ActiveAssignedOrganizationId = null;
-
-        foreach (var history in PositionHistory.Where(x => x.IsActive))
+        var assignment = AssignedPositions.FirstOrDefault(x => x.Id == assignmentId);
+        if (assignment != null)
         {
-            history.IsActive = false;
-            history.RemovedAt = DateTime.UtcNow;
-            history.RemovedById = accountId;
+            AssignedPositions.Remove(assignment);
         }
     }
 }

@@ -23,9 +23,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
                          IUserHandler userHandler,
                          IHrmProClient hrmClient,
                          IHrmProcessingService hrmProcessingService,
-                         ITranslationService translationService,
-                         IPositionChangingNotifier notifier,
-                         ILogger<PhoneNumberHandler> logger) : IPhoneNumberHandler
+                         ITranslationService translationService) : IPhoneNumberHandler
 {
     public async Task<ErrorOr<Success>> HandleUserAssignPhoneNumber(AssignUserPhoneNumberMessage message, CancellationToken cancellationToken = default)
     {
@@ -39,8 +37,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
         var user = errorOrUser.Value;
 
         var phoneNumber = await phoneNumberService.GetAll(x => x.Id == message.PhoneNumberId, tracked: true)
-            .Include(x => x.ActiveAssignedUser)
-            .Include(x => x.UsersHistory.Where(x => x.IsActive == true))
+            .Include(x => x.AssignedUsers)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (phoneNumber is null)
@@ -48,12 +45,8 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
             return ApplicationErrors.EntityNotFoundForGivenId<PhoneNumber, Guid>(message.PhoneNumberId);
         }
 
-        if (phoneNumber.ActiveAssignedUser is not null)
-        {
-            return Application.Common.Errors.ApplicationErrors.NumberAlreadyAssignedToUser;
-        }
 
-        phoneNumber.AssignUser(user, message.OrganizationId, message.UserAccountIdWhoDoesAction);
+        phoneNumber.AssignUser(user, message.UserAccountIdWhoDoesAction);
 
         await phoneNumberService.SaveChanges(cancellationToken);
 
@@ -98,16 +91,6 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
             });
     }
 
-    public async Task<ErrorOr<PhoneNumber>> HandleGetById(GetPhoneNumberByIdMessage message, CancellationToken cancellationToken = default)
-    {
-        return await phoneNumberService.GetById(message.Id,
-                                                tracked: true,
-                                                includeStrings: [nameof(PhoneNumber.ActiveAssignedUser),
-                                                $"{nameof(PhoneNumber.UsersHistory)}.{nameof(UserPhoneNumber.User)}"],
-                                                cancellationToken: cancellationToken);
-
-    }
-
     public async Task<ListResult<PhoneNumberListItemWithPosition>> HandleList(ListPhoneNumbersMessage message, CancellationToken cancellationToken = default)
     {
         var query = phoneNumberService.GetAll(tracked: false).AsExpandable();
@@ -120,28 +103,25 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
         if (message.UserExternalId is { } userExternalId)
         {
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            query = query.Where(x => x.ActiveAssignedPositionUser.ExternalId == userExternalId);
+            query = query.Where(x =>
+                x.AssignedPositions.Any(
+                    ap => ap.Users.Any(u => u.ExternalId == userExternalId)));
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
 
         if (message.PositionId is { } positionId)
         {
-            query = query.Where(x => x.ActiveAssignedPositionId == positionId);
-        }
-
-        if (message.Positions.Count > 0)
-        {
-            query = query.Where(x => message.Positions.Contains(x.ActiveAssignedPositionId!.Value));
+            query = query.Where(x => x.AssignedPositions.Any(ap => ap.PositionId == positionId));
         }
 
         if (message.Status is { } status)
         {
             query = status switch
             {
-                Status.NotAssigned => query.Where(x => x.ActiveAssignedPositionId == null && x.ActiveAssignedPositionUserId == null),
-                Status.AssignedToUser => query.Where(x => x.ActiveAssignedPositionUser != null),
-                Status.AssignedToPosition => query.Where(x => x.ActiveAssignedPositionUser == null && x.ActiveAssignedPositionId != null),
-                Status.AssignedToPosition | Status.AssignedToUser => query.Where(x => x.ActiveAssignedPositionId != null || x.ActiveAssignedPositionId == null),
+                Status.NotAssigned => query.Where(x => !x.AssignedPositions.Any()),
+                Status.AssignedToUser => query.Where(x => x.AssignedPositions.Any(ap => ap.Users.Any()) || x.AssignedUsers.Any()),
+                Status.AssignedToPosition => query.Where(x => x.AssignedPositions.Any()),
+                Status.AssignedToPosition | Status.AssignedToUser => query.Where(x => x.AssignedPositions.Any(ap => ap.Users.Any()) || x.AssignedUsers.Any()),
                 _ => query,
             };
         }
@@ -169,12 +149,10 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
         var data = await query.Select(PhoneNumberListItem.To.Expand()).ToListAsync(cancellationToken);
 
-        var workerIds = data.Where(x => x.AssignedUser is not null)
-                            .Select(x => x.AssignedUser!.ExternalId)
+        var workerIds = data.SelectMany(x => x.PositionWithExternalIds.SelectMany(pwi => pwi.WorkerExternalIds))
                             .ToList();
 
-        var positionIds = data.Where(x => x.PositionId is not null)
-                              .Select(x => x.PositionId)
+        var positionIds = data.SelectMany(x => x.PositionWithExternalIds.Select(pwi => pwi.PositionId))
                               .ToList();
 
 
@@ -235,52 +213,18 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
         foreach (var phoneNumber in data)
         {
-            WorkerResponse? worker = null;
-
-
-            if (phoneNumber.AssignedUser is not null)
-            {
-                worker = workers.FirstOrDefault(x => x.Id == phoneNumber.AssignedUser.ExternalId);
-
-                if (worker is not null && worker.DepartmentPosition.Id != phoneNumber.PositionId)
-                {
-                    var positionChangedMessage = new PositionChangedMessage()
-                    {
-                        PositionId = phoneNumber.PositionId ?? 0,
-                        UserExternalId = worker.Id
-                    };
-
-                    worker = null;
-
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                    Task.Run(() =>
-                    {
-                        try
-                        {
-                            notifier.Notify(positionChangedMessage);
-                        }
-                        catch (Exception ex)
-                        {
-                            logger.LogError(ex, "Error occuring while notify position change");
-                        }
-                    }, CancellationToken.None);
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                }
-            }
-
-            Position? position = null;
-
-            if (phoneNumber.PositionId != null)
-            {
-                position = positions.FirstOrDefault(x => x.Id == phoneNumber.PositionId);
-            }
+            var positionsWrapper = phoneNumber.PositionWithExternalIds.Select(pwi =>
+                new PositionWrapper(
+                    pwi.PositionAssignmentId,
+                    positions.FirstOrDefault(p => p.Id == pwi.PositionId)!,
+                    workers.Where(w => pwi.WorkerExternalIds.Contains(w.Id))
+                )).ToList();
 
             var phoneNumberWithPosition = new PhoneNumberListItemWithPosition(phoneNumber.Id,
                                                                               phoneNumber.Number,
                                                                               phoneNumber.Type.ToString(),
-                                                                              worker,
-                                                                              position);
-            if (userFilter && worker is null)
+                                                                              positionsWrapper);
+            if (userFilter && !positionsWrapper.Any(pw => pw.Workers.Any()))
             {
             }
             else
@@ -295,7 +239,6 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
     public async Task<ErrorOr<Success>> HandleRemoveUserPhoneNumber(RemoveUserPhoneNumberMessage message, CancellationToken cancellationToken = default)
     {
         var phoneNumber = await phoneNumberService.GetAll(x => x.Id == message.Id, tracked: true)
-            .Include(x => x.UsersHistory.Where(x => x.IsActive == true))
             .FirstOrDefaultAsync(cancellationToken);
 
         if (phoneNumber is null)
@@ -303,7 +246,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
             return ApplicationErrors.EntityNotFoundForGivenId<PhoneNumber, Guid>(message.Id);
         }
 
-        phoneNumber.UnAssignUser(message.UserAccountIdWhoDoesAction);
+        phoneNumber.UnAssignUser(message.UserAssignmentId, message.UserAccountIdWhoDoesAction);
 
         await phoneNumberService.SaveChanges(cancellationToken);
 
@@ -335,7 +278,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
     public async Task<ErrorOr<Success>> HandlePositionAssignPhoneNumber(AssignPositionPhoneNumberMessage message, CancellationToken cancellationToken = default)
     {
         var phoneNumber = await phoneNumberService.GetAll(x => x.Id == message.PhoneNumberId, tracked: true)
-            .Include(x => x.PositionHistory.Where(x => x.IsActive == true))
+            .Include(x => x.AssignedPositions)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (phoneNumber is null)
@@ -345,9 +288,8 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
 
         phoneNumber.AssignPosition(message.PositionId,
         message.OrganizationId,
-        message.Organization,
-        message.Department,
-        message.Position,
+        message.DepartmentId,
+        message.InnerPositionId,
         message.UserAccountIdWhoDoesAction);
 
         await phoneNumberService.SaveChanges(cancellationToken);
@@ -358,7 +300,7 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
     public async Task<ErrorOr<Success>> HandleRemovePhoneNumberFromPosition(RemovePositionPhoneNumberMessage message, CancellationToken cancellationToken = default)
     {
         var phoneNumber = await phoneNumberService.GetAll(x => x.Id == message.Id, tracked: true)
-            .Include(x => x.PositionHistory.Where(x => x.IsActive == true))
+            .Include(x => x.AssignedPositions)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (phoneNumber is null)
@@ -366,7 +308,71 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
             return ApplicationErrors.EntityNotFoundForGivenId<PhoneNumber, Guid>(message.Id);
         }
 
-        phoneNumber.UnAssignPosition(message.UserAccountIdWhoDoesAction);
+        phoneNumber.UnAssignPosition(message.PositionAssignmentId, message.UserAccountIdWhoDoesAction);
+
+        await phoneNumberService.SaveChanges(cancellationToken);
+
+        return new Success();
+    }
+
+    public async Task<ErrorOr<Success>> HandlePositionUserAssignPhoneNumber(AssignPositionUserPhoneNumberMessage message, CancellationToken cancellationToken = default)
+    {
+        var errorOrUser = await userHandler.HandleAddOrGetUser(message.User, cancellationToken);
+
+        if (errorOrUser.IsError)
+        {
+            return errorOrUser.FirstError;
+        }
+
+        var user = errorOrUser.Value;
+
+        var phoneNumber = await phoneNumberService.GetAll(x => x.Id == message.PhoneNumberId,
+                                tracked: true)
+            .Include(x => x.AssignedPositions.Where(x => x.Id == message.PositionAssignmentId))
+                .ThenInclude(x => x.Users)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (phoneNumber is null)
+        {
+            return ApplicationErrors.EntityNotFoundForGivenId<PhoneNumber, Guid>(message.PhoneNumberId);
+        }
+
+        var positionAssignment = phoneNumber.AssignedPositions
+            .FirstOrDefault(x => x.Id == message.PositionAssignmentId);
+
+        if (positionAssignment is null || positionAssignment.PositionId != message.PositionId)
+        {
+            return Application.Common.Errors.ApplicationErrors.PhoneNumberNotAssignedToPosition;
+        }
+
+        positionAssignment.AssignUser(user, message.UserAccountIdWhoDoesAction);
+
+        await phoneNumberService.SaveChanges(cancellationToken);
+
+        return new Success();
+    }
+
+    public async Task<ErrorOr<Success>> HandleRemovePositionUserPhoneNumber(RemovePositionUserPhoneNumberMessage message, CancellationToken cancellationToken = default)
+    {
+        var phoneNumber = await phoneNumberService.GetAll(x => x.Id == message.Id, tracked: true)
+                                                  .Include(x => x.AssignedPositions.Where(p => p.Id == message.PositionAssignmentId))
+                                                    .ThenInclude(p => p.Users.Where(u => u.Id == message.UserId))
+                                                  .FirstOrDefaultAsync(cancellationToken);
+
+        if (phoneNumber is null)
+        {
+            return ApplicationErrors.EntityNotFoundForGivenId<PhoneNumber, Guid>(message.Id);
+        }
+
+        var positionAssignment = phoneNumber.AssignedPositions
+            .FirstOrDefault(x => x.Id == message.PositionAssignmentId);
+
+        if (positionAssignment is null)
+        {
+            return Application.Common.Errors.ApplicationErrors.PhoneNumberNotAssignedToPosition;
+        }
+
+        positionAssignment.UnAssignUser(message.UserId, message.UserAccountIdWhoDoesAction);
 
         await phoneNumberService.SaveChanges(cancellationToken);
 
@@ -391,30 +397,33 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
         }
 
         while (hasWorker)
+        {
+            string queryWithPage = query + $"&page={page}";
+
+            var response = await hrmClient.GetWorkers(login.TokenValue, queryWithPage, cancellationToken);
+
+            var listResponse = response.Data;
+
+            if (listResponse.Total > page * perPage)
             {
-                string queryWithPage = query + $"&page={page}";
-
-                var response = await hrmClient.GetWorkers(login.TokenValue, queryWithPage, cancellationToken);
-
-                var listResponse = response.Data;
-
-                if (listResponse.Total > page * perPage)
-                {
-                    page++;
-                }
-                else
-                {
-                    hasWorker = false;
-                }
-
-                workers.AddRange(listResponse.Data);
+                page++;
             }
+            else
+            {
+                hasWorker = false;
+            }
+
+            workers.AddRange(listResponse.Data);
+        }
 
         var workerIds = workers.Select(x => x.Id).ToList();
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-        var workerIdsWhoHasPhoneNumber = await phoneNumberService.GetAll(x => workerIds.Contains(x.ActiveAssignedPositionUser.ExternalId))
-            .Select(x => x.ActiveAssignedPositionUser.ExternalId).ToListAsync(cancellationToken);
+        var workerIdsWhoHasPhoneNumber = await phoneNumberService.GetAll(x => x.AssignedPositions
+                                                                             .Any(ap => ap.PositionId == message.PositionId &&
+                                                                            ap.Users
+                                                                         .Any(u => workerIds.Contains(u.ExternalId))))
+            .SelectMany(x => x.AssignedPositions).SelectMany(ap => ap.Users).Select(u => u.ExternalId).ToListAsync(cancellationToken);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
         var workersWhoHasPhoneNumber = workers.Where(x => workerIdsWhoHasPhoneNumber.Contains(x.Id)).ToList();
@@ -423,131 +432,5 @@ class PhoneNumberHandler(IBaseService<PhoneNumber, Guid> phoneNumberService,
             cancellationToken);
 
         return workersWithPhoneNumber;
-    }
-
-    public async Task<ListResult<PhoneNumberListItem>> HandleSearchByUser(SearchPhoneNumbersByUserMessage message, CancellationToken cancellationToken = default)
-    {
-        IQueryable<PhoneNumber> query = phoneNumberService.GetAll(x => x.ActiveAssignedUserId != null,
-                                                                  tracked: false)
-                                      ;
-
-        var predicate = message.BuildPredicate(translationService);
-
-        if (predicate.IsStarted)
-        {
-            query = query.Where(predicate);
-        }
-
-        int total = await query.CountAsync(cancellationToken);
-
-        query = query.Paged(message.Pagination);
-
-        var data = await query.AsExpandable().Select(PhoneNumberListItem.To).ToListAsync(cancellationToken);
-
-
-        return message.ToListResultWithData(data,
-                                            total);
-    }
-
-    public async Task<ErrorOr<Success>> HandlePositionUserAssignPhoneNumber(AssignPositionUserPhoneNumberMessage message, CancellationToken cancellationToken = default)
-    {
-        var errorOrUser = await userHandler.HandleAddOrGetUser(message.User, cancellationToken);
-
-        if (errorOrUser.IsError)
-        {
-            return errorOrUser.FirstError;
-        }
-
-        var user = errorOrUser.Value;
-
-        var phoneNumber = await phoneNumberService.GetAll(x => x.Id == message.PhoneNumberId, tracked: true)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (phoneNumber is null)
-        {
-            return ApplicationErrors.EntityNotFoundForGivenId<PhoneNumber, Guid>(message.PhoneNumberId);
-        }
-
-        if (phoneNumber.ActiveAssignedPositionId != message.PositionId)
-        {
-            return Application.Common.Errors.ApplicationErrors.PhoneNumberNotAssignedToPosition;
-        }
-
-        phoneNumber.AssignPositionUser(user, message.UserAccountIdWhoDoesAction);
-
-        await phoneNumberService.SaveChanges(cancellationToken);
-
-        return new Success();
-    }
-
-    public async Task<List<WorkerWithPhoneNumber>> HandlePositionPhoneNumbersClient(ListPhoneNumbersForPositionMessageClient message, CancellationToken cancellationToken = default)
-    {
-        var login = await hrmClient.Login(cancellationToken);
-
-        List<WorkerResponse> workers = [];
-        bool hasWorker = true;
-        int page = 1;
-        int perPage = 100;
-
-        string query = $"?organization_id={message.OrganizationId}&per_page={perPage}";
-
-        if (message.PositionId.HasValue)
-        {
-            query += $"&department_position_id={message.PositionId}";
-        }
-
-        while (hasWorker)
-            {
-                string queryWithPage = query + $"&page={page}";
-
-                var response = await hrmClient.GetWorkers(login.TokenValue, queryWithPage, cancellationToken);
-
-                var listResponse = response.Data;
-
-                if (listResponse.Total > page * perPage)
-                {
-                    page++;
-                }
-                else
-                {
-                    hasWorker = false;
-                }
-
-                workers.AddRange(listResponse.Data);
-            }
-
-        var workerIds = workers.Select(x => x.Id).ToList();
-
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-        var workerIdsWhoHasPhoneNumber = await phoneNumberService.GetAll(x => x.ActiveAssignedPositionUserId != null &&
-                                                                         workerIds.Contains(x.ActiveAssignedPositionUser.ExternalId))
-            .Select(x => x.ActiveAssignedPositionUser.ExternalId).ToListAsync(cancellationToken);
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-
-        var workersWhoHasPhoneNumber = workers.Where(x => workerIdsWhoHasPhoneNumber.Contains(x.Id)).ToList();
-
-        var workersWithPhoneNumber = await hrmProcessingService.GetWorkersWithPhoneNumberInPosition(workersWhoHasPhoneNumber,
-            message.PositionId,
-             cancellationToken);
-
-        return workersWithPhoneNumber;
-    }
-
-    public async Task<ErrorOr<Success>> HandleRemovePositionUserPhoneNumber(RemovePositionUserPhoneNumberMessage message, CancellationToken cancellationToken = default)
-    {
-        var phoneNumber = await phoneNumberService.GetAll(x => x.Id == message.Id, tracked: true)
-            .Include(x => x.UsersHistory.Where(x => x.IsActive == true))
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (phoneNumber is null)
-        {
-            return ApplicationErrors.EntityNotFoundForGivenId<PhoneNumber, Guid>(message.Id);
-        }
-
-        phoneNumber.UnAssignPositionUser(message.UserAccountIdWhoDoesAction);
-
-        await phoneNumberService.SaveChanges(cancellationToken);
-
-        return new Success();
     }
 }

@@ -10,15 +10,16 @@ public static class RemovePositionPhoneNumberEndpoint
 {
     public static RouteHandlerBuilder MapRemovePhoneNumberFromPosition(this RouteGroupBuilder route)
     {
-        return route.MapPut(Routes.RemovePositionPhoneNumber, Handler);
+        return route.MapDelete(Routes.RemovePositionPhoneNumber, Handler);
     }
 
     [Authorize]
     static async Task Handler([FromRoute] Guid id,
+                              [FromRoute] Guid positionAssignmentId,
                               IPhoneNumberHandler handler,
                               HttpContext context)
     {
-        var removePhoneNumberMessage = new RemovePositionPhoneNumberMessage(id, context.GetUserId());
+        var removePhoneNumberMessage = new RemovePositionPhoneNumberMessage(id, positionAssignmentId, context.GetUserId());
 
         await handler.HandleRemovePhoneNumberFromPosition(removePhoneNumberMessage,
                                               context.RequestAborted);

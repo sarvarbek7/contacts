@@ -29,17 +29,6 @@ class UserHandler(IBaseService<User, int> userService,
                                       cancellationToken)).Match<ErrorOr<User>>(v => user, e => e);
     }
 
-    public async Task<User?> HandleGetUserByExternalId(GetUserByExternalIdMessage message, CancellationToken cancellationToken = default)
-    {
-        var query = userService.GetAll(x => x.ExternalId == message.ExternalId, tracked: false);
-
-        query = query.Include(x => x.ActivePhoneNumbers)
-                     .Include(x => x.PhoneNumberHistory)
-                     .ThenInclude(h => h.PhoneNumber);
-
-        return await query.FirstOrDefaultAsync(cancellationToken);
-    }
-
     public async Task<ListResult<User>> HandleSelectUsers(SelectUsersMessage message, CancellationToken cancellationToken = default)
     {
         var query = userService.GetAll(tracked: false);
@@ -83,7 +72,7 @@ class UserHandler(IBaseService<User, int> userService,
         {
             if (message.HaveNumber.Value)
             {
-                query = query.Where(x => x.ActivePhonePositionNumbers.Any());
+                query = query.Where(x => x.PositionAssignments.Any());
             }
         }
 

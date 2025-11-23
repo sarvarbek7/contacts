@@ -10,7 +10,6 @@ public interface IUserHandler
     Task<ErrorOr<User>> HandleAddOrGetUser(User user,
                                 CancellationToken cancellationToken = default);
 
-    Task<User?> HandleGetUserByExternalId(GetUserByExternalIdMessage message, CancellationToken cancellationToken = default);
 
     Task<ListResult<User>> HandleSelectUsers(SelectUsersMessage message,
                                              CancellationToken cancellationToken = default);

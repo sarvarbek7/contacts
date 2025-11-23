@@ -8,18 +8,16 @@ public static class PhoneNumbersGroup
 
         group.MapAssignUserPhoneNumber();
         group.MapPositionAssignPhoneNumber();
+        
         group.MapCreatePhoneNumber();
         group.MapDeletePhoneNumberNumber();
-        group.MapGetPhoneNumberNumber();
         group.MapListPhoneNumbers();
         group.MapRemovePhoneNumberFromUser();
         group.MapRemovePhoneNumberFromPosition();
         group.MapUpdatePhoneNumber();
-        group.MapListPhoneNumbersForPosition();
-        group.MapSearchPhoneNumbersByUser();
-        group.MapAssignPositionUserPhoneNumber();
         group.MapSelectPhoneNumbers();
-        group.MapListPhoneNumbersForPositionClient();
+
+        group.MapAssignPositionUserPhoneNumber();
         group.MapAssignPositionPhoneNumberBatchEndpoint();
         group.MapRemovePositionUserPhoneNumber();
 

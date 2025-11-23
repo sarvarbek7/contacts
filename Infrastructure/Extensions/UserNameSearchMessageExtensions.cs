@@ -26,13 +26,10 @@ public static class UserNameSearchMessageExtensions
                     var translationResult = translationService.Translate(temp);
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-#pragma warning disable CS8604 // Possible null reference argument.
-                    predicate.Or(x => EF.Functions.ILike(x.ActiveAssignedPositionUser.LastName, $"%{translationResult.Latin}%"));
-
-                    predicate.Or(x => EF.Functions.ILike(x.ActiveAssignedPositionUser.FirstName, $"%{translationResult.Latin}%"));
-
-                    predicate.Or(x => EF.Functions.ILike(x.ActiveAssignedPositionUser.MiddleName, $"%{translationResult.Latin}%"));
-#pragma warning restore CS8604 // Possible null reference argument.
+                    predicate.Or(x => x.AssignedPositions.Any(x => x.Users.Any(u =>
+                        EF.Functions.ILike(u.FirstName, $"%{translationResult.Latin}%") ||
+                        EF.Functions.ILike(u.LastName, $"%{translationResult.Latin}%") ||
+                        EF.Functions.ILike(u.MiddleName, $"%{translationResult.Latin}%"))));
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
                 }
             }

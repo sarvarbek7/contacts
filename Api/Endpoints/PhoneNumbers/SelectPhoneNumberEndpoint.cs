@@ -27,7 +27,7 @@ public static class SelectPhoneNumberEndpoint
 
         if (query.PositionId.HasValue)
         {
-            queryable = queryable.Where(p => p.ActiveAssignedPositionId == query.PositionId);
+            queryable = queryable.Where(p => p.AssignedPositions.Any(ap => ap.PositionId == query.PositionId));
         }
 
         if (query.Search?.Trim() is { } search)
@@ -43,12 +43,10 @@ public static class SelectPhoneNumberEndpoint
 
         queryable = queryable.Paged(pagination);
 
-        var data = (await queryable.Select(x => new { x.Id, x.Number, x.Type, x.ActiveAssignedPositionUser })
-            .ToListAsync(context.RequestAborted))
-            .Select(x => new  SelectPhoneNumber(x.Id,
+        var data = await queryable.Select(x => new SelectPhoneNumber(x.Id,
                                                 x.Number,
-                                                x.Type.ToString().ToLower(),
-                                                x.ActiveAssignedPositionUser is null ? null : UserMapping.UserDomainToListItem.Compile().Invoke(x.ActiveAssignedPositionUser)));
+                                                x.Type.ToString().ToLower()))
+                   .ToListAsync(context.RequestAborted);
 
         PageDetail pageDetail = new(pagination, total);
 

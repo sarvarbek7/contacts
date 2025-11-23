@@ -24,7 +24,19 @@ public static class ListPhoneNumbersEndpoint
 
         var result = await phoneNumberHandler.HandleList(message, httpContext.RequestAborted);
 
-        result.Data?.ForEach(x => x.AssignedUser?.Worker.HideNumber());
+        if (result.Data is not null)
+        {
+            foreach (var item in result.Data)
+            {
+                foreach (var i in item.Positions)
+                {
+                    foreach (var user in i.Workers)
+                    {
+                        user.Worker.HideNumber();
+                    }
+                }
+            }
+        }
 
         var response = (result.Data ?? []).ToListResponse(result.PageDetail);
 

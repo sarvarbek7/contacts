@@ -36,9 +36,6 @@ public static class DependencyInjection
 
         services.AddSingleton<IPasswordHashingService, PasswordHashingService>();
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
-
-        services.AddSingleton<IPositionChangingNotifier, PositionChangingNotifier>();
-        services.AddSingleton<IPositionChangingReceiver, PositionChangingReceiver>();
     }
 
     private static void AddHttpClients(IServiceCollection services)

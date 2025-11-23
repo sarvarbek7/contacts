@@ -20,7 +20,4 @@ public record ListPhoneNumbersQuery : PagedRecordQuery
 
     [FromQuery(Name = "positionId")]
     public int? PositionId { get; init; }
-
-    [FromQuery(Name = "positions")]
-    public string? Positions { get; init; }
 }

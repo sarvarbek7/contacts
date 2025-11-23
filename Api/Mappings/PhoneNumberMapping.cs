@@ -20,9 +20,11 @@ public static class PhoneNumberMapping
 
     public static AssignPositionUserPhoneNumberMessage MapTo(this AssignPhoneNumberToPositionUserRequest request,
                                                              Guid phoneNumberId,
+                                                             Guid positionAssignmentId,
                                                              int accountId)
     {
         return new AssignPositionUserPhoneNumberMessage(request.User.MapTo(),
+                                                        positionAssignmentId,
                                                         request.PositionId,
                                                         phoneNumberId,
                                                         accountId);
@@ -43,20 +45,12 @@ public static class PhoneNumberMapping
 
     public static ListPhoneNumbersMessage MapTo(this ListPhoneNumbersQuery query)
     {
-        List<int> positions = [];
-
-        if (query.Positions is { } positionsQuery)
-        {
-            positions.AddRange(positionsQuery.Split(',').Select(int.Parse));
-        }
-
         return new ListPhoneNumbersMessage(query.ToPagination(),
                                            query.Number,
                                            query.User,
                                            query.Status,
                                            query.UserExternalId,
-                                           query.PositionId,
-                                           positions);
+                                           query.PositionId);
     }
 
     public static AssignUserPhoneNumberMessage MapTo(this AssignPhoneNumberRequest request,
@@ -73,9 +67,8 @@ public static class PhoneNumberMapping
         return new(request.PositionId,
                    id,
                    request.OrganizationId,
-                   request.Organization,
-                   request.Department,
-                   request.Position,
+                   request.DepartmentId,
+                   request.InnerPositionId,
                    accountId);
     }
 
@@ -91,18 +84,7 @@ public static class PhoneNumberMapping
              Id = x.Id,
              Number = x.Number,
              Type = x.Type.ToString(),
-             AssignedUser = UserMapping.UserDomainToListItem!.Invoke(x.AssignedUser),
          };
-
-    public static Expression<Func<Domain.PhoneNumbers.PhoneNumber, Contracts.PhoneNumbers.PhoneNumber>> PhoneNumberDomainToContract =>
-        x => new Contracts.PhoneNumbers.PhoneNumber()
-        {
-            Id = x.Id,
-            Number = x.Number,
-            ActiveAssignedUser = x.ActiveAssignedUser == null ? null : UserMapping.UserDomainToListItem.Invoke(x.ActiveAssignedUser),
-            History = x.UsersHistory.Select(u => UserPhoneNumberToUserHistoryItem.Invoke(u)).ToList(),
-            PositionHistory = x.PositionHistory.Select(p => UserPositionPhoneNumberToHistoryItem.Invoke(p)).ToList()
-        };
 
     // public static Expression<Func<UserPhoneNumber, PhoneNumberHistoryItem>> UserPhoneNumberToPhoneNumberHistoryItem =>
     //     x => new PhoneNumberHistoryItem()
@@ -114,32 +96,6 @@ public static class PhoneNumberMapping
     //         RemovedAt = x.RemovedAt
     //     };
 
-    public static Expression<Func<UserPhoneNumber, UserHistoryItem>> UserPhoneNumberToUserHistoryItem
-     =>
-        x => new UserHistoryItem()
-        {
-            Id = x.Id,
-            User = x.User == null ? null : UserMapping.UserDomainToListItem.Invoke(x.User),
-            IsActive = x.IsActive,
-            CreatedAt = x.CreatedAt,
-            RemovedAt = x.RemovedAt
-        };
-
-    public static Expression<Func<PositionPhoneNumber, PositionHistoryItem>> UserPositionPhoneNumberToHistoryItem =>
-        x => new PositionHistoryItem()
-        {
-            Id = x.Id,
-            PositionId = x.PositionId,
-            IsActive = x.IsActive,
-            CreatedAt = x.CreatedAt,
-            RemovedAt = x.RemovedAt,
-        };
-
-    public static ListPhoneNumbersForPositionMessage MapTo(this ListPhoneNumbersForPositionQuery query)
-        => new(query.OrganizationId, query.PositionId);
-
-    public static ListPhoneNumbersForPositionMessageClient MapToClientMessage(this ListPhoneNumbersForPositionQuery query)
-       => new(query.OrganizationId, query.PositionId);
 
     public static SelectPhoneNumberMessage MapTo(this SelectPhoneNumbersQuery query)
       => new(query.PositionId, query.ToPagination());

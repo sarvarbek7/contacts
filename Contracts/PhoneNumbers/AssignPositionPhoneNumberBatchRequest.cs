@@ -1,12 +1,10 @@
 namespace Contacts.Contracts.PhoneNumbers;
 
 public record AssignPositionPhoneNumberBatchRequest(int PositionId,
-                                               string Organization,
-                                               string Department,
-                                               string Position,
-                                               int OrganizationId,
-                                               IEnumerable<Guid> PhoneIds) : AssignPositionPhoneNumberRequest(PositionId,
-                                                                                                 Organization,
-                                                                                                 Department,
-                                                                                                 Position,
-                                                                                                 OrganizationId);
+                                                    int OrganizationId,
+                                                    int DepartmentId,
+                                                    int InnerPositionId,
+                                                    IEnumerable<Guid> PhoneIds) : AssignPositionPhoneNumberRequest(PositionId,
+                                                                                                                   OrganizationId,
+                                                                                                                   DepartmentId,
+                                                                                                                   InnerPositionId);

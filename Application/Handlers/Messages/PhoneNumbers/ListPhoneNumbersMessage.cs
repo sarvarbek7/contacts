@@ -8,5 +8,4 @@ public record ListPhoneNumbersMessage(Pagination Pagination,
                                       string? User,
                                       Status? Status,
                                       int? UserExternalId,
-                                      int? PositionId,
-                                      List<int> Positions) : IUserNameSearchMessage, IPaginatedMessage;
+                                      int? PositionId) : IUserNameSearchMessage, IPaginatedMessage;

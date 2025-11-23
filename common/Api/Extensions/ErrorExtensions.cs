@@ -1,8 +1,8 @@
 using ErrorOr;
-using Microsoft.AspNetCore.Mvc;
 using Shared;
 using Microsoft.AspNetCore.Http;
 using Domain.Enums;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Extensions;
 
