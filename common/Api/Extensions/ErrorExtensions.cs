@@ -3,6 +3,7 @@ using Shared;
 using Microsoft.AspNetCore.Http;
 using Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Api.Extensions;
 
@@ -21,6 +22,18 @@ public static class ErrorExtensions
         {
             _defaultErrorMessages.Add(message.Key, message.Value);
         }
+    }
+
+    public static ProblemHttpResult ToProblemHttpResult(this Error error, string language)
+    {
+        var problemDetails = error.ToProblemDetails(language);
+        
+        return TypedResults.Problem(problemDetails);
+    }
+
+    public static ProblemHttpResult ToProblemHttpResult(this Error error, Language languageEnum)
+    {
+        return error.ToProblemHttpResult(languageEnum.ToString().ToLowerInvariant());
     }
 
     public static ProblemDetails ToProblemDetails(this Error error, string language)
