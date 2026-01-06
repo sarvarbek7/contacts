@@ -24,7 +24,7 @@ internal class AccountHandler(IBaseService<Account, int> accountService,
             return ApplicationErrors.AccountExists;
         }
 
-        if (message.Login is {Length: < 8})
+        if (message.Password is {Length: < 8})
         {
             return ApplicationErrors.InvalidPassword;
         }
